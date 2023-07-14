@@ -7,7 +7,9 @@ from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 import time
 import json
+from dotenv import dotenv_values
 
+config = dotenv_values('.env')
 driver = webdriver.Edge()
 wait = WebDriverWait(driver, 10)
 
@@ -132,12 +134,12 @@ def fetch_from_twitter(driver=None, username=None, password=None, must_keywords=
         wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[1]/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div/div[1]/div/div/div/div/div/div[3]/div'))).click()
         time.sleep(3)
         # advanced search ends here
-    
-    # shift from top to latest
-    wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a'))).click()
-    time.sleep(3)
+    else:
+        # shift from top to latest
+        wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a'))).click()
+        time.sleep(3)
 
-    for _ in range(num_tweets//5):
+    for _ in range(num_tweets//10):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(3)
 
@@ -150,8 +152,8 @@ def fetch_from_twitter(driver=None, username=None, password=None, must_keywords=
     success = store_json(data)
     return success
 
-twitter_username = 'GithubArchs'
-twitter_password = 'githubArchitectsForLife'
+twitter_username = config['USERNAME']
+twitter_password = config['PASSWORD']
 must_keywords = 'cards bajaj finserv'
 optional_keywords = ''
 from_year = '2021'
