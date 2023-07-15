@@ -160,17 +160,21 @@ def get_subreddit_data(request):
     return Response(response_data)
 
 
-
 @csrf_exempt
 @require_POST
 def get_tweets(request):
     data = json.loads(request.body.decode('utf-8'))
     keyword = data.get('keyword', '')
     count = data.get('count', '20')  # Default count is set to 20 if not provided
-    print(keyword, count)
+    until = data.get('until')  # Optional parameter 'until' for the date filter
+    print(keyword, count, until)
+    
     url = "https://twitter135.p.rapidapi.com/v1.1/SearchTweets/"
 
     querystring = {"q": keyword, "count": count}
+    
+    if until:
+        querystring['until'] = until
 
     headers = {
         "X-RapidAPI-Key": "54caaa891bmsh28b30d3e6519382p1e54dejsnb01e24eac7f5",
@@ -179,6 +183,7 @@ def get_tweets(request):
 
     response = requests.get(url, headers=headers, params=querystring)
     data = response.json()
+    
     tweets = []
     for status in data.get('statuses', []):
         tweet = {
