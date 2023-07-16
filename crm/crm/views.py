@@ -24,6 +24,7 @@ def get_instagram_profile(request):
         "locale": "en",
         "geo": "India"
     })
+    
     headers = {
         'Accept': 'application/json',
         'Authorization': 'Basic UzAwMDAxMTExMjE6UCRXMTM5YThjMmQwNTM2NTg2MmI5ZTk0Y2IzZjM3NzAzMzJj',
@@ -35,7 +36,7 @@ def get_instagram_profile(request):
 
     json_data = json.loads(data)
     response_data = {}
-
+    print(json_data)
     if "data" in json_data:
         profile_data = json_data["data"]["content"]["account"]
 
@@ -177,8 +178,8 @@ def get_tweets(request):
         querystring['until'] = until
 
     headers = {
-        "X-RapidAPI-Key": "54caaa891bmsh28b30d3e6519382p1e54dejsnb01e24eac7f5",
-        "X-RapidAPI-Host": "twitter135.p.rapidapi.com"
+    'X-RapidAPI-Key': '7e64447bcbmshfb8b4c9bbfa9cfep1a249djsnc9e7bc548924',
+    'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
     }
 
     response = requests.get(url, headers=headers, params=querystring)
