@@ -9,7 +9,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from django.views.decorators.http import require_GET
-
+from django.shortcuts import render
 
 @api_view(['POST'])
 def get_instagram_profile(request):
@@ -202,3 +202,27 @@ def get_tweets(request):
         tweets.append(tweet)
 
     return JsonResponse({'tweets': tweets})
+
+def login(request):
+    return render(request, 'login.html')
+
+def signup(request):
+    return render(request, 'signup.html')
+
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+def generateLeads(request):
+    return render(request, 'generateLeads.html')
+
+def generateData(request):
+    return render(request, "generateData.html")
+
+def dataVisualization(request):
+    return render(request, "dataVisualization.html")
+
+def crmConnect(request):
+    return render(request, "connect.html")
+
+def crmMessage(request):
+    return render(request, "message.html")
