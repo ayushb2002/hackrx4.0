@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,get_tweets, login, signup, dashboard, generateData, generateLeads, dataVisualization, crmConnect, crmMessage
+from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,login, signup, dashboard, generateData, generateLeads, dataVisualization, crmConnect, crmMessage
 from django.shortcuts import redirect
 
 urlpatterns = [
@@ -13,8 +13,8 @@ urlpatterns = [
     path('subreddit-data/', get_subreddit_data, name='get_subreddit_data'),
     # keyword, count
     path('tweets/', get_tweets, name='get_tweets'),
-    # index page
-    path('', lambda request: redirect('login/', permanent=False)),
+    # path('fb/', scrape_facebook_page, name='scrape_facebook_page'),
+     path('', lambda request: redirect('login/', permanent=False)),
     # login page
     path('login/', login, name='login'),
     # signup page

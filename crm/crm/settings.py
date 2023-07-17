@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     'leads',
+    'facebook_scraper'
+    
 ]
 
 MIDDLEWARE = [
