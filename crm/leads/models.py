@@ -12,7 +12,7 @@ class Lead(models.Model):
     username=models.CharField(max_length=100,default=None)
     location=models.CharField(max_length=100,default=None)
     status=models.CharField(choices=STATUS_CHOICES,max_length=100,default='new')
-    handled_by=models.OneToOneField("accounts.employee", on_delete=models.CASCADE,default=None,null=True)
+    handled_by=models.ManyToManyField("accounts.employee", default=None,null=True)
 
     # Add other fields as needed for lead information
     def __str__(self):

@@ -72,7 +72,8 @@ Dashboard | CRM
     <div class="col-md-7 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Leads generated</h4>
+                <h4 class="card-title">Leads generated {{message}} </h4>
+                <div id="alertBox" class="alert">{{message}}</div>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
@@ -119,17 +120,39 @@ Dashboard | CRM
                                 <th> Managed by</th>
                             </tr>
                         </thead>
+                        
                         <tbody>
                            
-                                {% for lead in leads %}
-                                <tr>
-                                    <td>{{ lead.status }}</td>
-                                    <td>{{ lead.username }}</td>
-                                    <td>{{ lead.location }}</td>
-                                    <td>{{ lead.handled_by }}</td>
-                                    <!-- Display more fields as needed -->
-                                </tr>
+                            {% for lead in leads %}
+                            <tr>
+                              <td>
+                                <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
+                                  <input type="hidden" name="account_name" value="{{ lead.username }}">
+                                  <input type="hidden" name="form_id" value="{{ id }}">
+                                  {{lead.status}}
+                                  
+                                  <select id="status-{{ lead.username }}-{{ id }}" name="status">
+                                    <option value="new">New Lead</option>
+                                    <option value="engaged">Engaged Lead</option>
+                                    <option value="qualified">Qualified Lead</option>
+                                    <option value="converted">Converted Lead</option>
+                                    <option value="lost">Lost Lead</option>
+                                  </select>
+                                 
+                                </form>
+                              </td>
+                              <td>{{ lead.username }}</td>
+                              <td>{{ lead.location }}</td>
+                              <td>{{ lead.handled_by }}</td>
+                              <!-- Display more fields as needed -->
+                            </tr>
+                            <script>
+                              document.getElementById('status-{{ lead.username }}-{{ id }}').addEventListener('change', function() {
+                                document.getElementById('lead-form-{{ lead.username }}-{{ id }}').submit();
+                              });
+                            </script>
                             {% endfor %}
+                            
                                   
                         </tbody>
                     </table>
@@ -206,4 +229,5 @@ Dashboard | CRM
         </div>
     </div>
 </div>
+
 {% endblock content %}
