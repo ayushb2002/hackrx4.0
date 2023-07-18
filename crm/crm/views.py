@@ -687,33 +687,62 @@ def save_posts(request):
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+from django.http import HttpResponse
 
+from django.shortcuts import redirect
+
+def approve_employee_view(request):
+    if request.method == 'POST':
+        employee_id = request.POST.get('employee_id')
+        try:
+            employee = Employee.objects.get(id=employee_id)
+            employee.is_approved = True
+            employee.save()
+            return redirect('dashboard')
+        except Employee.DoesNotExist:
+            return HttpResponse('Employee not found')
+    else:
+        return HttpResponse('Invalid request method')
+    
 @csrf_exempt
 def dashboard(request):
     if request.method=="POST":
-            account_name = request.POST.get('account_name')
             form_id = request.POST.get('form_id')
-            selected_option = request.POST.get('status')
-            print(account_name,form_id,selected_option)
+            print(form_id)
+            if form_id == 'emp_req':
+                employee_id = request.POST.get('employee_id')
+                print(employee_id)
+                employee = Employee.objects.get(id=employee_id)
+                employee.is_approved = True
+                employee.save()
+                return JsonResponse("employee approved",safe=False)
             
+            else:
+                account_name = request.POST.get('account_name')
+                form_id = request.POST.get('form_id')
+                selected_option = request.POST.get('status')
+                print(account_name,form_id,selected_option)
+                
+                
+                Lead.objects.filter(username=account_name).update(status=selected_option)
+                lead = Lead.objects.get(username=account_name)
+                lead.handled_by.add(form_id)
+                print("status changed")
+                Employeeob = Employee.objects.get(id=form_id)
             
-            Lead.objects.filter(username=account_name).update(status=selected_option)
-            lead = Lead.objects.get(username=account_name)
-            lead.handled_by.add(form_id)
-            print("status changed")
+                leads = Lead.objects.all()
+                count_leads = Lead.objects.count()
 
-            
-            leads = Lead.objects.all()
-            
-            Employeeob = Employee.objects.get(id=form_id)
-            context= {
-                'username': Employeeob.email,
-                'user_type': "sales",
-                'leads': leads,
-                'id':form_id,
-                'message': "Status Updated"
-                }
-            return render(request, 'dashboard.html',context=context)
+                
+                context= {
+                    'username': Employeeob.email,
+                    'user_type': "sales",
+                    'leads': leads,
+                    'id':form_id,
+                    'message': "Status Updated",
+                    'leads_generated': count_leads
+                    }
+                return render(request, 'dashboard.html',context=context)
     if request.method=="GET":
             username=request.user
             current_user = request.user
@@ -796,6 +825,10 @@ def dashboard(request):
                 service_link="https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:["+str(card)+","+str(emi)+","+str(loan)+","+str(investment)+"],fill:false,borderColor:'blue'}]}}"
                 
                 leads = Lead.objects.all()
+                count_leads = Lead.objects.count()
+                
+                #employee joining requests
+                req=Employee.objects.filter(is_approved=False)
                 
                 context= {
                 'username': username,
@@ -803,16 +836,19 @@ def dashboard(request):
                 "intent":link,
                 "response":response_link,
                 "service":service_link,
-                "leads": leads
+                "leads": leads,
+                "leads_generated": count_leads,
+                "employee_req":req
                 }
             else:
-                
+                count_leads = Lead.objects.count()
                 leads = Lead.objects.all()
                 context= {
                 'username': username,
                 'user_type': user_type,
                 'leads': leads,
-                'id': employee.id
+                'id': employee.id,
+                "leads_generated": count_leads
                 }
             return render(request, 'dashboard.html',context=context)
         

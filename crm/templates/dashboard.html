@@ -29,7 +29,7 @@ Dashboard | CRM
                     alt="circle-image" />
                 <h4 class="font-weight-normal mb-3">Leads generated <i class="mdi mdi-chart-line mdi-24px float-right"></i>
                 </h4>
-                <h2 class="mb-5">{{leads_generated}} leads</h2>
+                <h2 class="mb-5">{{leads_generated}}</h2>
                 {% comment %} <h6 class="card-text">Increased by 60%</h6> {% endcomment %}
             </div>
         </div>
@@ -168,66 +168,33 @@ Dashboard | CRM
 
 
 
-    <div class="col-md-5 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title text-white">Todo</h4>
-                <div class="add-items d-flex">
-                    <input type="text" class="form-control todo-list-input" placeholder="What do you need to do today?">
-                    <button class="add btn btn-gradient-primary font-weight-bold todo-list-add-btn"
-                        id="add-task">Add</button>
-                </div>
-                <div class="list-wrapper">
-                    <ul class="d-flex flex-column-reverse todo-list todo-list-custom">
-                        <li>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                    <input class="checkbox" type="checkbox"> Meeting with Alisa </label>
-                            </div>
-                            <i class="remove mdi mdi-close-circle-outline"></i>
-                        </li>
-                        <li class="completed">
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                    <input class="checkbox" type="checkbox" checked> Call John </label>
-                            </div>
-                            <i class="remove mdi mdi-close-circle-outline"></i>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                    <input class="checkbox" type="checkbox"> Create invoice </label>
-                            </div>
-                            <i class="remove mdi mdi-close-circle-outline"></i>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                    <input class="checkbox" type="checkbox"> Print Statements </label>
-                            </div>
-                            <i class="remove mdi mdi-close-circle-outline"></i>
-                        </li>
-                        <li class="completed">
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                    <input class="checkbox" type="checkbox" checked> Prepare for
-                                    presentation </label>
-                            </div>
-                            <i class="remove mdi mdi-close-circle-outline"></i>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                    <input class="checkbox" type="checkbox"> Pick up kids from school
-                                </label>
-                            </div>
-                            <i class="remove mdi mdi-close-circle-outline"></i>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+<div class="col-md-5 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <form method="POST" action="{% url 'approve_employee' %}" id="emp_req" name="emp_req">
+          {% csrf_token %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Employee Name</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for employee in employee_req %}
+              <tr>
+                <td>{{ employee.name }}</td>
+                <td>
+                  <button type="submit" name="employee_id" value="{{ employee.id }}" class="btn btn-success">Approve</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endblock content %}
