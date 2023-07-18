@@ -1750,7 +1750,7 @@
   --bs-black: #000000;
   --bs-gray-100: #f8f9fa;
   --bs-gray-200: #e9ecef;
-  --bs-gray-300: #dee2e6;
+  --bs-gray-300: #dee2e6; 
   --bs-gray-400: #ced4da;
   --bs-gray-500: #adb5bd;
   --bs-gray-600: #6c757d;
@@ -3328,7 +3328,7 @@ progress {
   --bs-table-active-color: #212529;
   --bs-table-active-bg: rgba(0, 0, 0, 0.1);
   --bs-table-hover-color: #212529;
-  --bs-table-hover-bg: #f2edf3;
+  --bs-table-hover-bg: #EBF5FB;
   width: 100%;
   margin-bottom: 1rem;
   color: #212529;
@@ -6597,7 +6597,7 @@ textarea.form-control-lg {
   flex-direction: column;
   width: 100%;
   pointer-events: auto;
-  background-color: #f2edf3;
+  background-color: #EBF5FB;
   background-clip: padding-box;
   border: 1px solid #ebedf2;
   border-radius: 0.3rem;
@@ -11303,7 +11303,7 @@ code {
 
 /* Footer */
 .footer {
-  background: #f2edf3;
+  background: #EBF5FB;
   color: color(dark);
   border-top: 1px solid #e7dee9;
   padding: 30px 1rem;
@@ -12551,8 +12551,8 @@ code {
 
 /* gradient buttons */
 .btn-gradient-primary {
-  background: -webkit-gradient(linear, left top, right top, from(#da8cff), to(#9a55ff));
-  background: linear-gradient(to right, #da8cff, #9a55ff);
+  background: rgb(52,152,219);
+  background: linear-gradient(90deg, rgba(52,152,219,1) 0%, rgba(93,173,226,1) 50%, rgba(133,193,233,1) 100%);
   border: 0;
   -webkit-transition: opacity 0.3s ease;
   transition: opacity 0.3s ease; }
@@ -14440,7 +14440,7 @@ dl {
       width: 100%; } }
 
 .content-wrapper {
-  background: #f2edf3;
+  background: #EBF5FB;
   padding: 2.75rem 2.25rem;
   width: 100%;
   -webkit-box-flex: 1;
