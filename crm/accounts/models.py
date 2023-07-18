@@ -1,9 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Employee(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE,default=None)
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=20)
+    password = models.CharField(max_length=100,default="")
     email = models.EmailField()
     is_approved = models.BooleanField(default=False)
 
@@ -49,6 +52,7 @@ class InstagramProfile(models.Model):
     def __str__(self):
         return self.username
     
+    
 
 
 class InstagramStats(models.Model):
@@ -81,20 +85,7 @@ class SubredditData(models.Model):
         return self.title
 
 
-# class Tweet(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     keyword = models.CharField(max_length=100, default='keyword')
-#     created_at = models.CharField(max_length=100)
-#     full_text = models.TextField()
-#     user_name = models.CharField(max_length=100)
-#     screen_name = models.CharField(max_length=100)
-#     location = models.CharField(max_length=100)
-#     followers_count = models.IntegerField()
-#     friends_count = models.IntegerField()
-#     lang = models.CharField(max_length=10)
 
-#     def __str__(self):
-#         return self.id
 
 
 

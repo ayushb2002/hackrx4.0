@@ -21,6 +21,12 @@ from accounts.models import InstagramProfile,InstagramStats,InstagramPost,Subred
 from .serializers import InstagramProfileSerializer
 from leads.models import Post
 from django.shortcuts import render
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import pickle as pkl
+import warnings
+from leads.models import Lead
 
 @api_view(['POST'])
 def test(request):
@@ -397,63 +403,149 @@ def get_subreddit_data(request):
 
     return Response(response_data)
 from leads.models import Tweet
+# @csrf_exempt
+# def delete_duplicates(request):
+#     if request.method=='GET':
+#         stored_tweets = Tweet.objects.all().values()
+#         df = pd.DataFrame.from_records(stored_tweets)
+#         intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+#         intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+#         def predict_intent(s):
+#             s=[s]
+#             d=intent.predict(intent_tfidf.transform(s))
+#             if d[0][0] == 1:
+#                 return "enquiry"
+#             elif d[0][1] == 1:
+#                 return "general talk"
+#             else:
+#                 return "complaint"
+#         df["intent"] = df["full_text"].apply(predict_intent)
+#         value_counts = df["intent"].value_counts()
+#         leads = []
+#         for index, row in df.iterrows():
+#             print(row['intent'])
+#             if row['intent'] == 'enquiry':
+#                 leads.append((row['screen_name'], row['location']))
+#         for lead in leads:
+#             username = lead[0]
+#             location = lead[1]
+#             handled_by = None  # Replace 'Your Employee Name' with the appropriate employee name or query
+#             if not Lead.objects.filter(username=username).exists():
+#                 lead_obj = Lead.objects.create(username=username, location=location, status='new', handled_by=handled_by)
+#                 lead_obj.save()
+#         return JsonResponse("Data saved succesfully", safe=False)
 
 @csrf_exempt
-@require_POST
 def get_tweets(request):
-    data = json.loads(request.body.decode('utf-8'))
-    keyword = data.get('keyword', '')
-    count = data.get('count', '100')  # Default count is set to 20 if not provided
-    until = data.get('until')  # Optional parameter 'until' for the date filter
+    if request.method=="POST":
+        data = json.loads(request.body.decode('utf-8'))
+        keyword = data.get('keyword', '')
+        count = data.get('count', '100')  # Default count is set to 20 if not provided
+        until = data.get('until')  # Optional parameter 'until' for the date filter
 
-    url = "https://twitter135.p.rapidapi.com/v1.1/SearchTweets/"
-    querystring = {"q": keyword, "count": count}
+        url = "https://twitter135.p.rapidapi.com/v1.1/SearchTweets/"
+        querystring = {"q": keyword, "count": count}
 
-    if until:
-        querystring['until'] = until
+        if until:
+            querystring['until'] = until
 
-    headers = {
-        'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
-        'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
-    }
-
-    response = requests.get(url, headers=headers, params=querystring)
-    data = response.json()
-
-    tweets = []
-    for status in data.get('statuses', []):
-        tweet = {
-            'created_at': status.get('created_at', ''),
-            'full_text': status.get('full_text', ''),
-            'user': {
-                'name': status['user'].get('name', ''),
-                'screen_name': status['user'].get('screen_name', ''),
-                'location': status['user'].get('location', ''),
-                'followers_count': status['user'].get('followers_count', 0),
-                'friends_count': status['user'].get('friends_count', 0),
-            },
-            'lang': status.get('lang', ''),
+        headers = {
+            'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
+            'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
-        tweets.append(tweet)
 
-        # Store the tweet data in the database
-        Tweet.objects.create(
-            keyword=keyword,
-            created_at=status.get('created_at', ''),
-            full_text=status.get('full_text', ''),
-            user_name=status['user'].get('name', ''),
-            screen_name=status['user'].get('screen_name', ''),
-            location=status['user'].get('location', ''),
-            followers_count=status['user'].get('followers_count', 0),
-            friends_count=status['user'].get('friends_count', 0),
-            lang=status.get('lang', ''),
-        )
+        response = requests.get(url, headers=headers, params=querystring)
+        data = response.json()
+        print(data)
 
-    # Retrieve all stored tweets from the database
-    stored_tweets = Tweet.objects.all().values()
+        tweets = []
+        for status in data.get('statuses', []):
+            tweet = {
+                'created_at': status.get('created_at', ''),
+                'full_text': status.get('full_text', ''),
+                'user': {
+                    'name': status['user'].get('name', ''),
+                    'screen_name': status['user'].get('screen_name', ''),
+                    'location': status['user'].get('location', ''),
+                    'followers_count': status['user'].get('followers_count', 0),
+                    'friends_count': status['user'].get('friends_count', 0),
+                },
+                'lang': status.get('lang', ''),
+            }
+            tweets.append(tweet)
 
-    return JsonResponse({'tweets': tweets, 'stored_tweets': list(stored_tweets)})
+            # Store the tweet data in the database
+            Tweet.objects.create(
+                keyword=keyword,
+                created_at=status.get('created_at', ''),
+                full_text=status.get('full_text', ''),
+                user_name=status['user'].get('name', ''),
+                screen_name=status['user'].get('screen_name', ''),
+                location=status['user'].get('location', ''),
+                followers_count=status['user'].get('followers_count', 0),
+                friends_count=status['user'].get('friends_count', 0),
+                lang=status.get('lang', ''),
+            )
+            
 
+        # Retrieve all stored tweets from the database
+        stored_tweets = Tweet.objects.all().values()
+        
+        
+        df = pd.DataFrame(data['statuses'])
+        print(df.columns)
+        
+        #intent anaylsis
+        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+        def predict_intent(s):
+            s=[s]
+            d=intent.predict(intent_tfidf.transform(s))
+            if d[0][0] == 1:
+                return "enquiry"
+            elif d[0][1] == 1:
+                return "general talk"
+            else:
+                return "complaint"
+        df["intent"] = df["full_text"].apply(predict_intent)
+        value_counts = df["intent"].value_counts()
+        leads = []
+        for index, row in df.iterrows():
+            print(row['intent'])
+            if row['intent'] == 'enquiry':
+                leads.append((row['user']['screen_name'], row['user']['location']))
+        
+        #sentiment       
+        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+        def predict_sentiment(s):
+            s=[s]
+            d=sentiment.predict(sentiment_tfidf.transform(s))
+            if d[0]==1:
+                return "positive"
+            else:
+                return "negative"
+        df["sentiment"]=df["full_text"].apply(lambda x:predict_sentiment(x))
+        for index, row in df.iterrows():
+            print(row['sentiment'])
+            if row['sentiment'] == 'positive':
+                leads.append((row['user']['screen_name'], row['user']['location']))
+        
+        
+        for lead in leads:
+            username = lead[0]
+            location = lead[1]
+            handled_by = None  # Replace 'Your Employee Name' with the appropriate employee name or query
+            if not Lead.objects.filter(username=username).exists():
+                lead_obj = Lead.objects.create(username=username, location=location, status='new', handled_by=handled_by)
+                lead_obj.save()
+        
+        
+        
+        return JsonResponse({'tweets': tweets, 'stored_tweets': list(stored_tweets)})
+    if request.method=="GET":
+        stored_tweets = Tweet.objects.all().values()
+        return JsonResponse({'stored_tweets': list(stored_tweets)})
 
 def convert_dict_to_csv(data_dict):
     # Get the keys from the dictionary
@@ -592,16 +684,108 @@ def save_posts(request):
 
     return JsonResponse({'error': 'Invalid request method.'})
 
-
-
-def login(request):
-    return render(request, 'login.html')
-
-def signup(request):
-    return render(request, 'signup.html')
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    if request.method=="GET":
+        if request.GET.get('user_type')=="manager":
+            api_url = 'http://127.0.0.1:8000/tweets/'
+            response = requests.get(api_url)
+            json_data = response.json()
+            df = pd.json_normalize(json_data['stored_tweets'])
+            print(df.head)
+            
+            #intent anaylsis
+            intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+            intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+            def predict_intent(s):
+                s=[s]
+                d=intent.predict(intent_tfidf.transform(s))
+                if d[0][0] == 1:
+                    return "enquiry"
+                elif d[0][1] == 1:
+                    return "general talk"
+                else:
+                    return "complaint"
+            df["intent"] = df["full_text"].apply(predict_intent)
+            value_counts = df["intent"].value_counts()
+            # print(df["intent"])
+            general=value_counts['general talk']
+            complaint=value_counts['complaint']
+            enquiry=value_counts['enquiry']
+            print("general",general,"complaint",complaint,"enquiry",enquiry)
+            link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:["+str(general)+","+str(complaint)+","+str(enquiry)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+            print(link)
+            
+            
+            #sentiment analysis
+            sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+            sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+            def predict_sentiment(s):
+                s=[s]
+                d=sentiment.predict(sentiment_tfidf.transform(s))
+                if d[0]==1:
+                    return "positive"
+                else:
+                    return "negative"
+            df["sentiment"]=df["full_text"].apply(lambda x:predict_sentiment(x))
+            response = df["sentiment"].value_counts()
+            positive=response['positive']
+            negative=response['negative']
+            response_link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:["+str(positive)+","+str(negative)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+            print(response_link)
+            
+
+            
+            #service anaylsis
+            service=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
+            service_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
+            def predict_service(s):
+                s=[s]
+                d=service.predict(service_tfidf.transform(s))
+                if d[0][0]==1:
+                    return "EMI"
+                elif d[0][1]==1:
+                    return "insurance"
+                elif d[0][2]==1:
+                    return "investment"
+                elif d[0][3]==1:
+                    return "loan"
+                elif d[0][4]==1:
+                    return "savings"
+                else:
+                    return "card"
+            df["service"]=df["full_text"].apply(lambda x:predict_service(x))
+            service=df["service"].value_counts()
+            card=service['card']
+            emi=service['EMI']
+            loan=service['loan']
+            investment = service['investment']
+            service_link="https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:["+str(card)+","+str(emi)+","+str(loan)+","+str(investment)+"],fill:false,borderColor:'blue'}]}}"
+            
+            leads = Lead.objects.all()
+            
+            context= {
+            'username': request.GET.get('username'),
+            'user_type': request.GET.get('user_type'),
+            "intent":link,
+            "response":response_link,
+            "service":service_link,
+            "leads": leads
+            }
+        else:
+            leads = Lead.objects.all()
+            context= {
+            'username': request.GET.get('username'),
+            'user_type': request.GET.get('user_type'),
+            'leads': leads
+            }
+        
+            
+
+        
+        return render(request, 'dashboard.html',context=context)
 
 def generateLeads(request):
     return render(request, 'generateLeads.html')
