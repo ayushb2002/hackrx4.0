@@ -690,129 +690,134 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 @csrf_exempt
 def dashboard(request):
-    if request.method=="GET":
-        if request.GET.get('user_type')=="manager":
-            api_url = 'http://127.0.0.1:8000/tweets/'
-            response = requests.get(api_url)
-            json_data = response.json()
-            df = pd.json_normalize(json_data['stored_tweets'])
-            print(df.head)
-            
-            #intent anaylsis
-            intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-            intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
-            def predict_intent(s):
-                s=[s]
-                d=intent.predict(intent_tfidf.transform(s))
-                if d[0][0] == 1:
-                    return "enquiry"
-                elif d[0][1] == 1:
-                    return "general talk"
-                else:
-                    return "complaint"
-            df["intent"] = df["full_text"].apply(predict_intent)
-            value_counts = df["intent"].value_counts()
-            # print(df["intent"])
-            general=value_counts['general talk']
-            complaint=value_counts['complaint']
-            enquiry=value_counts['enquiry']
-            print("general",general,"complaint",complaint,"enquiry",enquiry)
-            link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:["+str(general)+","+str(complaint)+","+str(enquiry)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
-            print(link)
-            
-            
-            #sentiment analysis
-            sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-            sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
-            def predict_sentiment(s):
-                s=[s]
-                d=sentiment.predict(sentiment_tfidf.transform(s))
-                if d[0]==1:
-                    return "positive"
-                else:
-                    return "negative"
-            df["sentiment"]=df["full_text"].apply(lambda x:predict_sentiment(x))
-            response = df["sentiment"].value_counts()
-            positive=response['positive']
-            negative=response['negative']
-            response_link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:["+str(positive)+","+str(negative)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
-            print(response_link)
-            
-
-            
-            #service anaylsis
-            service=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
-            service_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
-            def predict_service(s):
-                s=[s]
-                d=service.predict(service_tfidf.transform(s))
-                if d[0][0]==1:
-                    return "EMI"
-                elif d[0][1]==1:
-                    return "insurance"
-                elif d[0][2]==1:
-                    return "investment"
-                elif d[0][3]==1:
-                    return "loan"
-                elif d[0][4]==1:
-                    return "savings"
-                else:
-                    return "card"
-            df["service"]=df["full_text"].apply(lambda x:predict_service(x))
-            service=df["service"].value_counts()
-            card=service['card']
-            emi=service['EMI']
-            loan=service['loan']
-            investment = service['investment']
-            service_link="https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:["+str(card)+","+str(emi)+","+str(loan)+","+str(investment)+"],fill:false,borderColor:'blue'}]}}"
-            
-            leads = Lead.objects.all()
-            
-            context= {
-            'username': request.GET.get('username'),
-            'user_type': request.GET.get('user_type'),
-            "intent":link,
-            "response":response_link,
-            "service":service_link,
-            "leads": leads
-            }
-        else:
-            Employeeob = Employee.objects.get(email=request.GET.get('username'))
-            
-            leads = Lead.objects.all()
-            context= {
-            'username': request.GET.get('username'),
-            'user_type': request.GET.get('user_type'),
-            'leads': leads,
-            'id':Employeeob.id
-            }
-        return render(request, 'dashboard.html',context=context)
-        
     if request.method=="POST":
-        account_name = request.POST.get('account_name')
-        form_id = request.POST.get('form_id')
-        selected_option = request.POST.get('status')
-        print(account_name,form_id,selected_option)
-        
-        
-        Lead.objects.filter(username=account_name).update(status=selected_option)
-        lead = Lead.objects.get(username=account_name)
-        lead.handled_by.add(form_id)
-        print("status changed")
+            account_name = request.POST.get('account_name')
+            form_id = request.POST.get('form_id')
+            selected_option = request.POST.get('status')
+            print(account_name,form_id,selected_option)
+            
+            
+            Lead.objects.filter(username=account_name).update(status=selected_option)
+            lead = Lead.objects.get(username=account_name)
+            lead.handled_by.add(form_id)
+            print("status changed")
 
-        
-        leads = Lead.objects.all()
-        
-        Employeeob = Employee.objects.get(id=form_id)
-        context= {
-            'username': Employeeob.email,
-            'user_type': "sales",
-            'leads': leads,
-            'id':form_id,
-            'message': "Status Updated"
-            }
-        return render(request, 'dashboard.html',context=context)
+            
+            leads = Lead.objects.all()
+            
+            Employeeob = Employee.objects.get(id=form_id)
+            context= {
+                'username': Employeeob.email,
+                'user_type': "sales",
+                'leads': leads,
+                'id':form_id,
+                'message': "Status Updated"
+                }
+            return render(request, 'dashboard.html',context=context)
+    if request.method=="GET":
+            username=request.user
+            current_user = request.user
+            employee = Employee.objects.get(email=current_user)
+            user_type=employee.position
+            if(user_type=="manager"):
+            
+                api_url = 'http://127.0.0.1:8000/tweets/'
+                response = requests.get(api_url)
+                json_data = response.json()
+                df = pd.json_normalize(json_data['stored_tweets'])
+                print(df.head)
+                
+                #intent anaylsis
+                intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+                intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+                def predict_intent(s):
+                    s=[s]
+                    d=intent.predict(intent_tfidf.transform(s))
+                    if d[0][0] == 1:
+                        return "enquiry"
+                    elif d[0][1] == 1:
+                        return "general talk"
+                    else:
+                        return "complaint"
+                df["intent"] = df["full_text"].apply(predict_intent)
+                value_counts = df["intent"].value_counts()
+                # print(df["intent"])
+                general=value_counts['general talk']
+                complaint=value_counts['complaint']
+                enquiry=value_counts['enquiry']
+                print("general",general,"complaint",complaint,"enquiry",enquiry)
+                link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:["+str(general)+","+str(complaint)+","+str(enquiry)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                print(link)
+                
+                
+                #sentiment analysis
+                sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+                sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+                def predict_sentiment(s):
+                    s=[s]
+                    d=sentiment.predict(sentiment_tfidf.transform(s))
+                    if d[0]==1:
+                        return "positive"
+                    else:
+                        return "negative"
+                df["sentiment"]=df["full_text"].apply(lambda x:predict_sentiment(x))
+                response = df["sentiment"].value_counts()
+                positive=response['positive']
+                negative=response['negative']
+                response_link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:["+str(positive)+","+str(negative)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                print(response_link)
+                
 
+                
+                #service anaylsis
+                service=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
+                service_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
+                def predict_service(s):
+                    s=[s]
+                    d=service.predict(service_tfidf.transform(s))
+                    if d[0][0]==1:
+                        return "EMI"
+                    elif d[0][1]==1:
+                        return "insurance"
+                    elif d[0][2]==1:
+                        return "investment"
+                    elif d[0][3]==1:
+                        return "loan"
+                    elif d[0][4]==1:
+                        return "savings"
+                    else:
+                        return "card"
+                df["service"]=df["full_text"].apply(lambda x:predict_service(x))
+                service=df["service"].value_counts()
+                card=service['card']
+                emi=service['EMI']
+                loan=service['loan']
+                investment = service['investment']
+                service_link="https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:["+str(card)+","+str(emi)+","+str(loan)+","+str(investment)+"],fill:false,borderColor:'blue'}]}}"
+                
+                leads = Lead.objects.all()
+                
+                context= {
+                'username': username,
+                'user_type': user_type,
+                "intent":link,
+                "response":response_link,
+                "service":service_link,
+                "leads": leads
+                }
+            else:
+                
+                leads = Lead.objects.all()
+                context= {
+                'username': username,
+                'user_type': user_type,
+                'leads': leads,
+                'id': employee.id
+                }
+            return render(request, 'dashboard.html',context=context)
+        
+   
+    
               
 
         
@@ -832,3 +837,22 @@ def crmConnect(request):
 
 def crmMessage(request):
     return render(request, "message.html")
+
+def sales_analytics(request):
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+
+    #anaylsis
+    new=Lead.objects.filter(status="new").count()
+    engaged=Lead.objects.filter(status="engaged",handled_by=employee.id).count()
+    qualified=Lead.objects.filter(status="qualified",handled_by=employee.id).count()
+    converted=Lead.objects.filter(status="converted",handled_by=employee.id).count()
+    lost=Lead.objects.filter(status="lost",handled_by=employee.id).count()
+    status_chart="https://quickchart.io/chart?c={type:'bar',data:{labels:['new','engaged','qualified','converted','lost'],datasets:[{label:'This month',data:["+str(new)+","+str(engaged)+","+str(qualified)+","+str(converted)+","+str(lost)+"],fill:false,borderColor:'blue'}]}}"
+    
+    context={
+        "username":current_user,
+        "user_type":employee.position,
+        "stats":status_chart
+    }
+    return render(request, "sales_anaylsis.html",context=context)
