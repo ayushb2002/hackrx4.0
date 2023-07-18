@@ -192,6 +192,28 @@ Dashboard | CRM
             </tbody>
           </table>
         </form>
+        <br><br>
+        <table class="table">
+            Top performing sales employee
+            <br>
+            <thead>
+              <tr>
+                <th>Employee Name</th>
+                <th>Leads generated</th>
+              </tr>
+            </thead>
+              {% for employee_lead in top_performers %}
+              <tr>
+                <td>{{ employee_lead.name }}</td>
+                <td>
+                    {{ employee_lead.converted_lead_count }}
+                </td>
+              </tr>
+              {% endfor %}
+            </thead>
+        </table>
+            <tbody>
+
       </div>
     </div>
   </div>

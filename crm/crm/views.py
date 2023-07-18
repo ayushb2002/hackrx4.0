@@ -703,7 +703,9 @@ def approve_employee_view(request):
             return HttpResponse('Employee not found')
     else:
         return HttpResponse('Invalid request method')
-    
+
+from django.db.models import Count  
+from django.db.models import Count, Q
 @csrf_exempt
 def dashboard(request):
     if request.method=="POST":
@@ -830,6 +832,14 @@ def dashboard(request):
                 #employee joining requests
                 req=Employee.objects.filter(is_approved=False)
                 
+
+                employee_lead_counts = Employee.objects.annotate(
+                    converted_lead_count=Count('lead', filter=Q(lead__status='converted'))
+                ).values('name', 'converted_lead_count')
+                
+                print(employee_lead_counts)
+
+             
                 context= {
                 'username': username,
                 'user_type': user_type,
@@ -838,7 +848,8 @@ def dashboard(request):
                 "service":service_link,
                 "leads": leads,
                 "leads_generated": count_leads,
-                "employee_req":req
+                "employee_req":req,
+                "top_performers": employee_lead_counts
                 }
             else:
                 count_leads = Lead.objects.count()
