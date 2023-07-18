@@ -9,16 +9,14 @@ class Lead(models.Model):
         ('lost', 'Lost Lead'),
     )
 
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    phone_number = models.CharField(max_length=20)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
-    score = models.IntegerField(default=0)
+    username=models.CharField(max_length=100,default=None)
+    location=models.CharField(max_length=100,default=None)
+    status=models.CharField(choices=STATUS_CHOICES,max_length=100,default='new')
+    handled_by=models.OneToOneField("accounts.employee", on_delete=models.CASCADE,default=None,null=True)
 
     # Add other fields as needed for lead information
-
     def __str__(self):
-        return self.name
+        return self.username
     
     
 class Tweet(models.Model):

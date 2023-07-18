@@ -1,5 +1,5 @@
-from django.urls import path
-from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,login, signup, dashboard, generateData, generateLeads, dataVisualization, crmConnect, crmMessage
+from django.urls import path,include
+from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateData, generateLeads, dataVisualization, crmConnect, crmMessage
 from django.shortcuts import redirect
 
 urlpatterns = [
@@ -16,11 +16,11 @@ urlpatterns = [
     # path('fb/', scrape_facebook_page, name='scrape_facebook_page'),
      path('', lambda request: redirect('login/', permanent=False)),
     # login page
-    path('login/', login, name='login'),
+    # path('login/', login, name='login'),
     # signup page
-    path('signup/', signup, name='signup'),
+    path("", include("accounts.urls")),
     # dashboard page
-    path('dashboard/', dashboard, name='dashboard'),
+    path('login/dashboard/', dashboard, name='dashboard'),
     # generate data
     path('generateData/', generateData, name='generateData'),
     # generate leads
