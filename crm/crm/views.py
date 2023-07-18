@@ -496,8 +496,8 @@ def get_tweets(request):
         print(df.columns)
         
         #intent anaylsis
-        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+        intent=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+        intent_tfidf=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
         def predict_intent(s):
             s=[s]
             d=intent.predict(intent_tfidf.transform(s))
@@ -516,8 +516,8 @@ def get_tweets(request):
                 leads.append((row['user']['screen_name'], row['user']['location']))
         
         #sentiment       
-        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+        sentiment=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+        sentiment_tfidf=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
         def predict_sentiment(s):
             s=[s]
             d=sentiment.predict(sentiment_tfidf.transform(s))
@@ -697,8 +697,8 @@ def dashboard(request):
             print(df.head)
             
             #intent anaylsis
-            intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-            intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+            intent=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+            intent_tfidf=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
             def predict_intent(s):
                 s=[s]
                 d=intent.predict(intent_tfidf.transform(s))
@@ -720,8 +720,8 @@ def dashboard(request):
             
             
             #sentiment analysis
-            sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-            sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+            sentiment=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+            sentiment_tfidf=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
             def predict_sentiment(s):
                 s=[s]
                 d=sentiment.predict(sentiment_tfidf.transform(s))
@@ -739,8 +739,8 @@ def dashboard(request):
 
             
             #service anaylsis
-            service=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
-            service_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
+            service=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
+            service_tfidf=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
             def predict_service(s):
                 s=[s]
                 d=service.predict(service_tfidf.transform(s))
