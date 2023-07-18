@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 import pickle as pkl
 import warnings
 from leads.models import Lead
+from accounts.models import Employee
 
 @api_view(['POST'])
 def test(request):
@@ -687,6 +688,7 @@ def save_posts(request):
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+@csrf_exempt
 def dashboard(request):
     if request.method=="GET":
         if request.GET.get('user_type')=="manager":
@@ -775,17 +777,46 @@ def dashboard(request):
             "leads": leads
             }
         else:
+            Employeeob = Employee.objects.get(email=request.GET.get('username'))
+            
             leads = Lead.objects.all()
             context= {
             'username': request.GET.get('username'),
             'user_type': request.GET.get('user_type'),
-            'leads': leads
+            'leads': leads,
+            'id':Employeeob.id
             }
+        return render(request, 'dashboard.html',context=context)
         
-            
+    if request.method=="POST":
+        account_name = request.POST.get('account_name')
+        form_id = request.POST.get('form_id')
+        selected_option = request.POST.get('status')
+        print(account_name,form_id,selected_option)
+        
+        
+        Lead.objects.filter(username=account_name).update(status=selected_option)
+        lead = Lead.objects.get(username=account_name)
+        lead.handled_by.add(form_id)
+        print("status changed")
 
         
+        leads = Lead.objects.all()
+        
+        Employeeob = Employee.objects.get(id=form_id)
+        context= {
+            'username': Employeeob.email,
+            'user_type': "sales",
+            'leads': leads,
+            'id':form_id,
+            'message': "Status Updated"
+            }
         return render(request, 'dashboard.html',context=context)
+
+              
+
+        
+    
 
 def generateLeads(request):
     return render(request, 'generateLeads.html')
