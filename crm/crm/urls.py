@@ -14,7 +14,7 @@ urlpatterns = [
     # keyword, count
     path('tweets/', get_tweets, name='get_tweets'),
     # path('fb/', scrape_facebook_page, name='scrape_facebook_page'),
-     path('', lambda request: redirect('login/', permanent=False)),
+    path('', lambda request: redirect('login/', permanent=False)),
     # login page
     # path('login/', login, name='login'),
     # signup page
