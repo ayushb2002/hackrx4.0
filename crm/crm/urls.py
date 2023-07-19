@@ -1,5 +1,5 @@
 from django.urls import path,include
-from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateData, generateLeads, dataVisualization, crmConnect, crmMessage,sales_analytics,approve_employee_view
+from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateDataForTwitter, generateDataForInsta, generateLeads, dataVisualization, crmConnect, crmMessage,sales_analytics,approve_employee_view
 from django.shortcuts import redirect
 
 urlpatterns = [
@@ -21,8 +21,10 @@ urlpatterns = [
     path("", include("accounts.urls")),
     # dashboard page
     path('login/dashboard/', dashboard, name='dashboard'),
-    # generate data
-    path('generateData/', generateData, name='generateData'),
+    # generate data Twitter
+    path('generateDataFromTwitter/', generateDataForTwitter, name='generateDataFromTwitter'),
+    # generate data Instagram
+    path('generateDataFromInsta/', generateDataForInsta, name='generateDataFromInsta'),
     # generate leads
     path('generateLeads/', generateLeads, name='generateLeads'),
     # data visualization

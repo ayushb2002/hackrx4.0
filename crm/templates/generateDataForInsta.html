@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Generate Data from Instagram | CRM
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-header">
+    <h3 class="page-title"> Personalize your search using filters </h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">Generate Data</li>
+            <li class="breadcrumb-item active" aria-current="page"><a
+                    href="{% url 'generateDataFromInsta' %}">Instagram</a></li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Instagram search</h4>
+                <p class="card-description"> Search by post </p>
+                <form class="forms-sample">
+                    <div class="form-group">
+                        <label for="exampleInputUsername1">Post Link</label>
+                        <textarea type="text" class="form-control" id="postLink" rows="10" placeholder="Enter Url links in the following format - ['https://....', 'https://...', 'https://...', 'http://...']"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Instagram search</h4>
+                <p class="card-description"> Search by hashtag </p>
+                <form class="forms-sample">
+                    <div class="form-group">
+                        <label for="exampleInputUsername1">Hashtag</label>
+                        <input type="text" class="form-control" id="hashtagContainer" placeholder="Enter hashtag without #">
+                    </div>
+                    <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

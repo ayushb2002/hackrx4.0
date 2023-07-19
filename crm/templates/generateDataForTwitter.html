@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Generate Data from Twitter | CRM
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-header">
+    <h3 class="page-title"> Personalize your search using filters </h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">Generate Data</li>
+            <li class="breadcrumb-item active" aria-current="page"><a
+                    href="{% url 'generateDataFromTwitter' %}">Twitter</a></li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Twitter search</h4>
+                <p class="card-description"> Generates upto 100 rows of data! </p>
+                <form class="forms-sample">
+                    <div class="form-group">
+                        <label for="exampleInputUsername1">Keywords</label>
+                        <input type="text" class="form-control" id="keywords" placeholder="Enter keywords">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Until</label>
+                        <input type="date" class="form-control" id="untilDate" placeholder="Leads upto dd/mm/yyyy">
+                    </div>
+                    <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3"></div>
+</div>
+
+{% endblock content %}

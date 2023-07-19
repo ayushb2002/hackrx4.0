@@ -861,8 +861,11 @@ def dashboard(request):
 def generateLeads(request):
     return render(request, 'generateLeads.html')
 
-def generateData(request):
-    return render(request, "generateData.html")
+def generateDataForTwitter(request):
+    return render(request, "generateDataForTwitter.html")
+
+def generateDataForInsta(request):
+    return render(request, "generateDataForInsta.html")
 
 def dataVisualization(request):
     return render(request, "dataVisualization.html")
