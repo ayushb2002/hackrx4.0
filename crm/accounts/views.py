@@ -133,7 +133,7 @@ def login(request):
         if user is not None:
             auth_login(request, user)
             # return render(request,'dashboard.html',context=context) 
-            return redirect("dashboard"+"/?username="+str(user)+"&user_type="+str(employee.position))
+            return redirect("dashboard")
         else:
             error_message = "password"
             return render(request, 'login.html', {'error_message': error_message})
