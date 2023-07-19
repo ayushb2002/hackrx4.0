@@ -129,6 +129,7 @@ def login(request):
         context={
             "username":user,
             "user_type":employee.position,
+            "uname":employee.name
         }
         if user is not None:
             auth_login(request, user)

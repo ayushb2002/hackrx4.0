@@ -11496,8 +11496,8 @@ code {
     height: 6px; }
 
 .bg-gradient-primary {
-  background: -webkit-gradient(linear, left top, right top, from(#da8cff), to(#9a55ff)) !important;
-  background: linear-gradient(to right, #da8cff, #9a55ff) !important; }
+  background: rgb(52,152,219);
+  background: linear-gradient(90deg, rgba(52,152,219,1) 0%, rgba(93,173,226,1) 50%, rgba(133,193,233,1) 100%) !important; }
 
 .bg-gradient-secondary {
   background: -webkit-gradient(linear, left top, right top, from(#e7ebf0), to(#868e96)) !important;
