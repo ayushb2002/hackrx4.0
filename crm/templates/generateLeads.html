@@ -8,7 +8,7 @@ Generate Leads | CRM
 {% block content %}
 
 <div class="page-header">
-    <h3 class="page-title"> Generate Leads from real time data </h3>
+    <h3 class="page-title"> Generate Leads </h3>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'generateLeads' %}">Generate
@@ -36,6 +36,13 @@ Generate Leads | CRM
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="selectData">Data</label>
+                        <select class="form-control form-control-lg" id="selectData">
+                            <option value="past" >Past Data</option>
+                            <option value="current" >Real Time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="dateUntil">Date until</label>
                         <input type="date" class="form-control form-control-lg" id="dateUntil" placeholder="Date upto which leads should be generated">
                     </div>
@@ -60,6 +67,13 @@ Generate Leads | CRM
                             <option value="emi" >EMI</option>
                             <option value="investment" >Investments</option>
                             <option value="savings" >Savings</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="selectData">Data</label>
+                        <select class="form-control form-control-lg" id="selectData">
+                            <option value="past" >Past Data</option>
+                            <option value="current" >Real Time</option>
                         </select>
                     </div>
                     <div class="form-group">
