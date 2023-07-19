@@ -28,6 +28,12 @@ import pickle as pkl
 import warnings
 from leads.models import Lead
 from accounts.models import Employee
+from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.db.models import Count, Q
+from django.conf import settings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 @api_view(['POST'])
 def test(request):
@@ -409,8 +415,8 @@ from leads.models import Tweet
 #     if request.method=='GET':
 #         stored_tweets = Tweet.objects.all().values()
 #         df = pd.DataFrame.from_records(stored_tweets)
-#         intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-#         intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+#         intent=pkl.load(open("model/intent_classification.pkl","rb"))
+#         intent_tfidf=pkl.load(open("model/intent_classification_tfidf.pkl","rb"))
 #         def predict_intent(s):
 #             s=[s]
 #             d=intent.predict(intent_tfidf.transform(s))
@@ -685,12 +691,6 @@ def save_posts(request):
 
     return JsonResponse({'error': 'Invalid request method.'})
 
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-from django.http import HttpResponse
-
-from django.shortcuts import redirect
-
 def approve_employee_view(request):
     if request.method == 'POST':
         employee_id = request.POST.get('employee_id')
@@ -704,8 +704,6 @@ def approve_employee_view(request):
     else:
         return HttpResponse('Invalid request method')
 
-from django.db.models import Count  
-from django.db.models import Count, Q
 @csrf_exempt
 def dashboard(request):
     if request.method=="POST":
@@ -757,10 +755,10 @@ def dashboard(request):
                 json_data = response.json()
                 df = pd.json_normalize(json_data['stored_tweets'])
                 print(df.head)
-                
+                model_folder = settings.BASE_DIR / 'model'
                 #intent anaylsis
-                intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-                intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+                intent=pkl.load(open(os.path.join(model_folder, os.path.basename("intent_classification.pkl")),"rb"))
+                intent_tfidf=pkl.load(open(os.path.join(model_folder, os.path.basename("intent_classification_tfidf.pkl")),"rb"))
                 def predict_intent(s):
                     s=[s]
                     d=intent.predict(intent_tfidf.transform(s))
@@ -782,8 +780,8 @@ def dashboard(request):
                 
                 
                 #sentiment analysis
-                sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-                sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+                sentiment=pkl.load(open("./model/sentiment_clf.pkl","rb"))
+                sentiment_tfidf=pkl.load(open("./model/sentiment_tfidf.pkl","rb"))
                 def predict_sentiment(s):
                     s=[s]
                     d=sentiment.predict(sentiment_tfidf.transform(s))
@@ -799,8 +797,8 @@ def dashboard(request):
                 print(response_link)
 
                 #service anaylsis
-                service=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
-                service_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
+                service=pkl.load(open(os.path.join(model_folder, os.path.basename("service_model.pkl")),"rb"))
+                service_tfidf=pkl.load(open(os.path.join(model_folder, os.path.basename('service_model_tfidf.pkl')),"rb"))
                 def predict_service(s):
                     s=[s]
                     d=service.predict(service_tfidf.transform(s))
