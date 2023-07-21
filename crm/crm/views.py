@@ -940,19 +940,6 @@ def generateDataForTwitter(request):
             df = pd.DataFrame(data['statuses'])
             print(df.columns)
         else:
-<<<<<<< HEAD
-            # If the 'statuses' field is empty or doesn't exist, handle the error here
-            message = "No tweets found"
-            context = {
-                'message': message
-            }
-            return redirect('generateDataFromTwitter')
-
-        # intent analysis
-        intent = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl", "rb"))
-        intent_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl", "rb"))
-
-=======
         # If the 'statuses' field is empty or doesn't exist, handle the error here
             message="No tweets found"
             context={
@@ -962,9 +949,8 @@ def generateDataForTwitter(request):
             return redirect('generateDataFromTwitter')
         
         #intent anaylsis
-        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
->>>>>>> 2eedc6b6ea49816f4bd7dc761cece8e836000761
+        intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
+        intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
         def predict_intent(s):
             s = [s]
             d = intent.predict(intent_tfidf.transform(s))
@@ -995,16 +981,9 @@ def generateDataForTwitter(request):
             print(row['intent'])
             if row['intent'] == 'enquiry':
                 leads.append((row['user']['screen_name'], row['user']['location']))
-<<<<<<< HEAD
-
-        sentiment = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl", "rb"))
-        sentiment_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl", "rb"))
-
-=======
         
-        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
->>>>>>> 2eedc6b6ea49816f4bd7dc761cece8e836000761
+        sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
+        sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
         def predict_sentiment(s):
             s = [s]
             d = sentiment.predict(sentiment_tfidf.transform(s))
@@ -1029,8 +1008,8 @@ def generateDataForTwitter(request):
             if row['sentiment'] == 'positive':
                 leads.append((row['user']['screen_name'], row['user']['location']))
 
-        service = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl", "rb"))
-        service_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl", "rb"))
+        service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
+        service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
 
         def predict_service(s):
             s = [s]
