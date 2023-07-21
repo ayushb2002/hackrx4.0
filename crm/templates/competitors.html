@@ -23,14 +23,11 @@ Competiton Analysis
             <div class="card-body">
                 <h4 class="card-title">Competitor Analysis</h4>
                 <p class="card-description"> Stay ahead of your competitors </p>
-                <form class="forms-sample">
+                <form class="forms-sample" method="POST" action="{% url 'competitors' %}">
+                    {% csrf_token %}
                     <div class="form-group">
                         <label for="compText">Name of competitors</label>
-                        <input type="text" class="form-control" id="compText" placeholder="Eg. SBI, HDFC etc.">
-                    </div>
-                    <div class="form-group">
-                        <label for="keywords">Keywords / Services</label>
-                        <input type="text" class="form-control" id="keywords" placeholder="Eg. Loans, Insurances etc.">
+                        <input type="text" class="form-control" id="compText" name="competitor" placeholder="Eg. SBI, HDFC etc." required>
                     </div>
                     <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
                     <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>

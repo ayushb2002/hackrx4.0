@@ -462,7 +462,7 @@ def get_tweets(request):
             querystring['until'] = until
 
         headers = {
-            'X-RapidAPI-Key': 'b6e219c59fmsh7bc8c7d3a548169p16351bjsnb91d80f04ecf',
+            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
@@ -890,9 +890,7 @@ def generateDataForTwitter(request):
         #     querystring['until'] = until
 
         headers = {
-            # 'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
-            # 'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
-            'X-RapidAPI-Key': 'd44b792600msh7b88ddb66d5d54fp1f9d61jsn5d1db7832743',
+            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
@@ -1184,22 +1182,6 @@ def dataVisualization(request):
         }
     return render(request, "dataVisualization.html",context=context)
 
-def crmConnect(request):
-    current_user = request.user
-    employee = Employee.objects.get(email=current_user)
-    context={
-        "username":current_user,
-        "user_type":employee.position}
-    return render(request, "connect.html",context=context)
-
-def crmMessage(request):
-    current_user = request.user
-    employee = Employee.objects.get(email=current_user)
-    context={
-        "username":current_user,
-        "user_type":employee.position}
-    return render(request, "message.html",context=context)
-
 def sales_analytics(request):
     current_user = request.user
     employee = Employee.objects.get(email=current_user)
@@ -1264,13 +1246,161 @@ def change_password_view(request):
 
     return render(request, 'settings.html')
 
+def sentiment(s):
+    sentiment_model=pkl.load(open(os.path.join(BASE_DIR, 'model/sentiment_clf.pkl'),'rb'))
+    sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,'model/sentiment_tfidf.pkl'),'rb'))
+    d=sentiment_model.predict(sentiment_tfidf.transform([s]))
+    if d[0]==1:
+        return "positive"
+    else:
+        return "negative"
+    
+def service(s):
+    service_model=pkl.load(open(os.path.join(BASE_DIR, 'model/service_model.pkl'),'rb'))
+    service_tfidf=pkl.load(open(os.path.join(BASE_DIR,'model/service_model_tfidf.pkl'),'rb'))
+    d=service_model.predict(service_tfidf.transform([s]))
+    if d[0][0]==1:
+        return "emi"
+    elif d[0][1]==1:
+        return "insurance"
+    elif d[0][2]==1:
+        return "investment"
+    elif d[0][3]==1:
+        return "loan"
+    elif d[0][4]==1:
+        return "savings"
+    else:
+        return "card"
+
+def insurance(s):
+    insurance_model=pkl.load(open(os.path.join(BASE_DIR, 'model/insurance-classification_model.pkl'),'rb'))
+    insurance_tfidf=pkl.load(open(os.path.join(BASE_DIR, 'model/insurance_classification_tfidf.pkl'),'rb'))
+    d=insurance_model.predict(insurance_tfidf.transform([s]))
+    if d[0][0]==1:
+        return "home"
+    elif d[0][1]==1:
+        return "life"
+    elif d[0][2]==1:
+        return "motor"
+    elif d[0][3]==1:
+        return "travel"
+    else:
+        return "health"
+    
+def loans(s):
+    loan_model=pkl.load(open(os.path.join(BASE_DIR, 'model/loan_model.pkl'),'rb'))
+    loan_tfidf=pkl.load(open(os.path.join(BASE_DIR, 'model/loan_model_tfidf.pkl'),'rb'))
+    d=loan_model.predict(loan_tfidf.transform([s]))
+    if d[0][0]==1:
+        return "car"
+    elif d[0][1]==1:
+        return "home"
+    elif d[0][2]==1:
+        return "personal"
+    elif d[0][3]==1:
+        return "student"
+    else:
+        return "business"    
+
+def intent(s):
+    s=[s]
+    intent_model=pkl.load(open(os.path.join(BASE_DIR, 'model/intent_classification.pkl'),'rb'))
+    intent_tfidf=pkl.load(open(os.path.join(BASE_DIR, 'model/intent_classification_tfidf.pkl'),'rb'))
+    d=intent_model.predict(intent_tfidf.transform(s))
+    if d[0][0]==1:
+        return "enquiry"
+    elif d[0][1]==1:
+        return "general talk"
+    else:
+        return "complaint"
+
+import re
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 
 def competitorAnalysis(request):
     current_user = request.user
     employee = Employee.objects.get(email=current_user)
-    
-    context={
-        "username":current_user,
-        "user_type":employee.position
+    if request.method == "GET":
+        context={
+            "username":current_user,
+            "user_type":employee.position
+            }
+        return render(request, "competitors.html", context=context)
+    elif request.method == "POST":
+        competitor = request.POST.get('competitor')
+        count = 500
+        url = "https://twitter135.p.rapidapi.com/v1.1/SearchTweets/"
+        querystring = {"q": competitor, "count": count}
+
+        headers = {
+            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
+            'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
-    return render(request, "competitors.html", context=context)
+        
+        response = requests.get(url, headers=headers, params=querystring)
+        data = response.json()
+        
+        df = pd.DataFrame(columns=['Text'])
+        for status in data.get('statuses', []):
+            if status.get('lang', '') == 'en':
+                txt = status.get('full_text', '')
+                txt = re.sub('[^a-zA-Z]', ' ', txt)
+                txt = txt.lower()
+                txt = txt.split()
+                wl = WordNetLemmatizer()
+                txt = [wl.lemmatize(word) for word in txt if not word in set(stopwords.words('english'))]
+                txt = ' '.join(txt)
+                if txt != '':
+                    df.loc[len(df)] = [txt]
+        
+        print(len(df))
+        
+        df["sentiment"]=df["Text"].apply(lambda x: sentiment(x))
+        df["intent"]=df["Text"].apply(lambda x: intent(x))
+        df["service"]=df["Text"].apply(lambda x: service(x))
+        df1=df[df["service"]=="insurance"]
+        df1["insurance"] = df1["Text"].apply(lambda x: insurance(x))
+        df2=df[df["service"]=="loan"]
+        df2["loan"] = df2["Text"].apply(lambda x: loans(x))
+        
+        intentVals = list(df["intent"].value_counts())
+        intentLabels = list(df["intent"].value_counts().index)
+        print(intentVals, intentLabels)
+        
+        intentChart = "https://quickchart.io/chart?c={type:'pie',data:{labels:['"+ intentLabels[0] +"','"+ intentLabels[1] +"','"+ intentLabels[2] +"'],datasets:[{data:["+ str(intentVals[0]) +", "+ str(intentVals[1]) +", "+ str(intentVals[2]) +"]}]}}"
+        
+        sentimentVals = list(df["sentiment"].value_counts())
+        sentimentLabels = list(df["sentiment"].value_counts().index)
+        print(sentimentVals,sentimentLabels)
+        
+        sentimentChart = "https://quickchart.io/chart?c={type:'pie',data:{labels:['"+ sentimentLabels[0] +"','"+ sentimentLabels[1] +"],datasets:[{data:["+ str(sentimentVals[0]) +", "+ str(sentimentVals[1]) +"]}]}}"
+        
+        serviceVals = list(df["service"].value_counts())
+        serviceLabels = list(df["service"].value_counts().index)
+        print(serviceVals, serviceLabels)
+        
+        serviceChart = "https://quickchart.io/chart?c={type:'pie',data:{labels:['"+ serviceLabels[0] +"','"+ serviceLabels[1] +"','"+ serviceLabels[2] +", "+ serviceLabels[3] +", "+ serviceLabels[4] +", "+ serviceLabels[5] +"'],datasets:[{data:["+ str(serviceVals[0]) +", "+ str(serviceVals[1]) +", "+ str(serviceVals[2]) +", "+ str(serviceVals[3]) +", "+ str(serviceVals[4]) +", "+ str(serviceVals[5]) +"]}]}}"
+        
+        insuranceVals = list(df1["insurance"].value_counts())
+        insuranceLabels = list(df1["insurance"].value_counts().index)
+        print(insuranceVals, insuranceLabels)
+        
+        insuranceChart = "https://quickchart.io/chart?c={type:'pie',data:{labels:['"+ insuranceLabels[0] +"','"+ insuranceLabels[1] +"','"+ insuranceLabels[2] +"','"+ insuranceLabels[3] +"','"+ insuranceLabels[4] +"'],datasets:[{data:["+ str(insuranceVals[0]) +", "+ str(insuranceVals[1]) +", "+ str(insuranceVals[2]) +", "+ str(insuranceVals[3]) +", "+ str(insuranceVals[4]) +"]}]}}"
+        
+        loanVals = list(df2["loan"].value_counts())
+        loanLabels = list(df2["loan"].value_counts().index)
+        print(loanVals ,loanLabels)
+        loanChart = "https://quickchart.io/chart?c={type:'pie',data:{labels:['"+ loanLabels[0] +"','"+ loanLabels[1] +"','"+ loanLabels[2] +"','"+ loanLabels[3] +"','"+ loanLabels[4] +"'],datasets:[{data:["+ str(loanVals[0]) +", "+ str(loanVals[1]) +", "+ str(loanVals[2]) +", "+ str(loanVals[3]) +", "+ str(loanVals[4]) +"]}]}}"
+        
+        context = {
+            "username":current_user,
+            "user_type":employee.position,
+            "intentChart": intentChart,
+            "sentimentChart": sentimentChart,
+            "servicesChart": serviceChart,
+            "insuranceChart": insuranceChart,
+            "loanChart": loanChart
+        }
+
+        return render(request, "analyzeCompetitors.html", context)

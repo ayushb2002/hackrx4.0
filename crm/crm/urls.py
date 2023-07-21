@@ -1,5 +1,5 @@
 from django.urls import path,include
-from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateDataForTwitter, generateDataForInsta, generateLeads, dataVisualization, crmConnect, crmMessage,sales_analytics,approve_employee_view,todo,settings,change_password_view,analysis, competitorAnalysis
+from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateDataForTwitter, generateDataForInsta, generateLeads, dataVisualization,sales_analytics,approve_employee_view,todo,settings,change_password_view,analysis, competitorAnalysis
 from django.shortcuts import redirect
 
 urlpatterns = [
@@ -29,10 +29,6 @@ urlpatterns = [
     path('generateLeads/', generateLeads, name='generateLeads'),
     # data visualization
     path('dataVisualization/', dataVisualization, name='dataVisualization'),
-    # crm connect
-    path('crmConnect', crmConnect, name="crmConnect"),
-    # crm message
-    path('crmMessage', crmMessage, name="crmMessage"),
     # sales analytics
     path('sales-analysis',sales_analytics,name='sales-analytics'),
     # admin approve employee account

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Results | Competiton Analysis 
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-header">
+    <h3 class="page-title"> Competitors Analysis Results </h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item "><a href="{% url 'competitors' %}">C.A.</a></li>
+            <li class="breadcrumb-item active">Results</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Intent Chart</h4>
+                <p class="card-description"> The intent of public towards you on social media </p>
+                <div class="my-5">
+                    <img src="{{ intentChart }}" alt="analysis" width="100%">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Sentiment Chart</h4>
+                <p class="card-description"> Ratio of positive to negative feelings for the company </p>
+                <div class="my-5">
+                    <img src="{{ sentimentChart }}" alt="analysis" width="100%">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Services Chart</h4>
+                <p class="card-description"> Buzz about the services being provided by the company </p>
+                <div class="my-5">
+                    <img src="{{ servicesChart }}" alt="analysis" width="100%">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Insurance Chart</h4>
+                <p class="card-description"> Insurance services being provided by the company </p>
+                <div class="my-5">
+                    <img src="{{ insuranceChart }}" alt="analysis" width="100%">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Loans Chart</h4>
+                <p class="card-description"> Loan services being provided by the company </p>
+                <div class="my-5">
+                    <img src="{{ loanChart }}" alt="analysis" width="100%">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
