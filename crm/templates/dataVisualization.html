@@ -25,39 +25,31 @@ Visualize Data | CRM
                 <p class="card-description"> Select appropriate filters </p>
 
 
-                <form class="forms-sample" name="dataVisualization" method="POST" action="{% url 'dataVisualization' %}">
+                <form class="forms-sample" name="dataVisualization" method="POST"
+                    action="{% url 'dataVisualization' %}">
                     {%csrf_token%}
                     <div class="form-group">
-                        <label for="selectService">Services</label>
-                        <select class="form-control form-control-lg" id="selectService" name="service">
-                            <option value="loan" >Loans</option>
-                            <option value="insurance" >Insurances</option>
-                            <option value="cards" >Credit Cards</option>
-                            <option value="emi" >EMI</option>
-                            <option value="investment" >Investments</option>
-                            <option value="savings" >Savings</option>
-                        </select>
+                        <label for="selectService">Keyword</label>
+                        <input type="text" class="form-control" id="selectService"
+                            placeholder="Eg. Loan, Mutual Funds etc." name="keyword">
                     </div>
                     <div class="form-group">
                         <label for="selectData">Social media</label>
                         <select class="form-control form-control-lg" id="selectData" name="social_media">
-                            <option value="past" >Instagram</option>
-                            <option value="current" >Twitter</option>
+                            <option value="past">Instagram</option>
+                            <option value="current">Twitter</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="selectChart" >Chart</label>
-                        <select class="form-control form-control-lg" id="selectChart" name="chart">
-                            <option value="bar" >Bar Graph</option>
-                            <option value="pie" >Pie Chart</option>
-                        </select>
+                        <label for="dateUntil">Date until</label>
+                        <input type="date" class="form-control" id="dateUntil" name="dateUntil">
                     </div>
                     <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
                     <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
                 </form>
 
 
-                
+
             </div>
         </div>
     </div>
@@ -72,31 +64,31 @@ Visualize Data | CRM
                 <th> Managed by</th>
             </tr>
         </thead>
-        
+
         <tbody>
-           
+
             {% for leads in lead %}
             <tr>
-              
+
                 <td>{{ leads.status }}</td>
-              
-              <td>{{ leads.username }}</td>
-              <td>{{ leads.location }}</td>
-              {% if leads.handled_by == "accounts.Employee.None" %}
+
+                <td>{{ leads.username }}</td>
+                <td>{{ leads.location }}</td>
+                {% if leads.handled_by == "accounts.Employee.None" %}
                 <td>Not Assigned yet</td>
                 {% else %}
-              <td>{{ leads.handled_by }}</td>
-          {% endif %}
-              <!-- Display more fields as needed -->
+                <td>{{ leads.handled_by }}</td>
+                {% endif %}
+                <!-- Display more fields as needed -->
             </tr>
             <script>
-              document.getElementById('status-{{ lead.username }}-{{ id }}').addEventListener('change', function() {
-                document.getElementById('lead-form-{{ lead.username }}-{{ id }}').submit();
-              });
+                document.getElementById('status-{{ lead.username }}-{{ id }}').addEventListener('change', function () {
+                    document.getElementById('lead-form-{{ lead.username }}-{{ id }}').submit();
+                });
             </script>
             {% endfor %}
-            
-                  
+
+
         </tbody>
     </table>
     {%endif%}
