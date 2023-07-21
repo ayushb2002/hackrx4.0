@@ -1265,3 +1265,12 @@ def change_password_view(request):
     return render(request, 'settings.html')
 
 
+def competitorAnalysis(request):
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    
+    context={
+        "username":current_user,
+        "user_type":employee.position
+        }
+    return render(request, "competitors.html", context=context)
