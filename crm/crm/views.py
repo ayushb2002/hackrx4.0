@@ -32,6 +32,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.db.models import Count, Q
 from django.conf import settings
+import os
+
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -706,7 +708,9 @@ def approve_employee_view(request):
             return HttpResponse('Employee not found')
     else:
         return HttpResponse('Invalid request method')
-
+from django.conf import settings
+import os
+from pathlib import Path
 @csrf_exempt
 def dashboard(request):
     if request.method=="POST":
@@ -752,6 +756,7 @@ def dashboard(request):
             current_user = request.user
             employee = Employee.objects.get(email=current_user)
             user_type=employee.position
+           
             if(user_type=="manager"):
             
                 api_url = 'http://127.0.0.1:8000/tweets/'
@@ -759,10 +764,12 @@ def dashboard(request):
                 json_data = response.json()
                 df = pd.json_normalize(json_data['stored_tweets'])
                 print(df.head)
-                model_folder = settings.BASE_DIR / 'model'
-                #intent anaylsis
-                intent=pkl.load(open(os.path.join(model_folder, os.path.basename("intent_classification.pkl")),"rb"))
-                intent_tfidf=pkl.load(open(os.path.join(model_folder, os.path.basename("intent_classification_tfidf.pkl")),"rb"))
+            
+                #intent anaylsi
+                # base_dir_path = Path(settings.BASE_DIR)
+                # model_folder = base_dir_path / 'model'
+                intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+                intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
                 def predict_intent(s):
                     s=[s]
                     d=intent.predict(intent_tfidf.transform(s))
@@ -784,8 +791,8 @@ def dashboard(request):
                 
                 
                 #sentiment analysis
-                sentiment=pkl.load(open("./model/sentiment_clf.pkl","rb"))
-                sentiment_tfidf=pkl.load(open("./model/sentiment_tfidf.pkl","rb"))
+                sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+                sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
                 def predict_sentiment(s):
                     s=[s]
                     d=sentiment.predict(sentiment_tfidf.transform(s))
@@ -801,8 +808,8 @@ def dashboard(request):
                 print(response_link)
 
                 #service anaylsis
-                service=pkl.load(open(os.path.join(model_folder, os.path.basename("service_model.pkl")),"rb"))
-                service_tfidf=pkl.load(open(os.path.join(model_folder, os.path.basename('service_model_tfidf.pkl')),"rb"))
+                service=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
+                service_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
                 def predict_service(s):
                     s=[s]
                     d=service.predict(service_tfidf.transform(s))
@@ -928,11 +935,24 @@ def generateDataForTwitter(request):
             
 
         # Retrieve all stored tweets from the database
-        stored_tweets = Tweet.objects.all().values()
+        # stored_tweets = Tweet.objects.all().values()
         
         
         df = pd.DataFrame(data['statuses'])
         print(df.columns)
+        if 'statuses' in data and data['statuses']:
+        # If the 'statuses' field is not empty, proceed with creating the DataFrame
+            df = pd.DataFrame(data['statuses'])
+            print(df.columns)
+        else:
+        # If the 'statuses' field is empty or doesn't exist, handle the error here
+           message="No tweets found"
+           context={
+               'message':message
+    
+           }
+           return redirect('generateDataFromTwitter')
+           
         model_folder = settings.BASE_DIR / 'model'
         #intent anaylsis
         intent=pkl.load(open(os.path.join(model_folder, os.path.basename("intent_classification.pkl")),"rb"))
@@ -1000,14 +1020,10 @@ def generateDataForTwitter(request):
 
 def generateDataForInsta(request):
     if request.method=="POST":
-                hashtag = request.data.get('hashtag', '')
+                hashtag = request.POST.get('hashtag', '')
+                print(hashtag)
                 # Retrieve existing results from the database
-                existing_results = InstagramPost.objects.filter(hashtag=hashtag)
-
-                
-                
-                hashtag = request.data.get('hashtag', '')
-                
+                existing_results = InstagramPost.objects.filter(hashtag=hashtag)            
                 conn = http.client.HTTPSConnection("scraper-api.smartproxy.com")
                 payload = json.dumps({
                     "target": "instagram_graphql_hashtag",
@@ -1024,6 +1040,7 @@ def generateDataForInsta(request):
                 res = conn.getresponse()
                 data = json.loads(res.read().decode("utf-8"))
                 result = []
+                print(res)
 
                 if 'data' in data:
                     data = data['data']
@@ -1049,6 +1066,7 @@ def generateDataForInsta(request):
                                         # Save the new post in the database
                                         new_post = InstagramPost.objects.create(hashtag=hashtag, post_link=link)
                                         result.append({'post_link': new_post.post_link})
+                                print(result)
 
                 return redirect('generateDataFromInsta')
         
@@ -1058,13 +1076,32 @@ def generateDataForInsta(request):
         "username":current_user,
         "user_type":employee.position}
     return render(request, "generateDataForInsta.html",context=context)
-
+from leads.models import Lead
 def dataVisualization(request):
+    if request.method=="POST":
+        service=request.POST.get('service')
+        social_media=request.POST.get('social_media')
+        chart=request.POST.get('chart')
+        current_user = request.user
+        employee = Employee.objects.get(email=current_user)
+        leads = Lead.objects.all()
+        
+
+        
+        context={
+            "username":current_user,
+            "user_type":employee.position,
+            "lead":leads,
+            }
+        return render(request, "dataVisualization.html",context=context)
+        
+        
     current_user = request.user
     employee = Employee.objects.get(email=current_user)
     context={
         "username":current_user,
-        "user_type":employee.position}
+        "user_type":employee.position
+        }
     return render(request, "dataVisualization.html",context=context)
 
 def crmConnect(request):
@@ -1105,3 +1142,37 @@ def sales_analytics(request):
 
 def todo(request):
     return render(request, "todo.html")
+
+def settings(request):
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+        "username":current_user,
+        "user_type":employee.position
+        }
+
+    return render(request, "settings.html",context=context)
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def change_password_view(request):
+    if request.method == 'POST':
+
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_new_password = request.POST.get('confirm_new_password')
+
+
+        if not request.user.check_password(current_password):
+            return render(request, 'change_password.html', {'error': 'Current password is incorrect.'})
+
+        if new_password != confirm_new_password:
+            return render(request, 'change_password.html', {'error': 'New password and confirm new password do not match.'})
+
+        request.user.set_password(new_password)
+        request.user.save()
+
+
+        return redirect('settings')
+
+    return render(request, 'settings.html')

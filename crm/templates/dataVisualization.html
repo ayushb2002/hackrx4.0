@@ -15,7 +15,7 @@ Visualize Data | CRM
         </ol>
     </nav>
 </div>
-
+{% if not lead%}
 <div class="row">
     <div class="col-md-3"></div>
     <div class="col-md-6 grid-margin stretch-card">
@@ -23,10 +23,13 @@ Visualize Data | CRM
             <div class="card-body">
                 <h4 class="card-title">Data Visualization</h4>
                 <p class="card-description"> Select appropriate filters </p>
-                <form class="forms-sample">
+
+
+                <form class="forms-sample" name="dataVisualization" method="POST" action="{% url 'dataVisualization' %}">
+                    {%csrf_token%}
                     <div class="form-group">
                         <label for="selectService">Services</label>
-                        <select class="form-control form-control-lg" id="selectService">
+                        <select class="form-control form-control-lg" id="selectService" name="service">
                             <option value="loan" >Loans</option>
                             <option value="insurance" >Insurances</option>
                             <option value="cards" >Credit Cards</option>
@@ -36,15 +39,15 @@ Visualize Data | CRM
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="selectData">Data</label>
-                        <select class="form-control form-control-lg" id="selectData">
-                            <option value="past" >Past Data</option>
-                            <option value="current" >Real Time</option>
+                        <label for="selectData">Social media</label>
+                        <select class="form-control form-control-lg" id="selectData" name="social_media">
+                            <option value="past" >Instagram</option>
+                            <option value="current" >Twitter</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="selectChart">Chart</label>
-                        <select class="form-control form-control-lg" id="selectChart">
+                        <label for="selectChart" >Chart</label>
+                        <select class="form-control form-control-lg" id="selectChart" name="chart">
                             <option value="bar" >Bar Graph</option>
                             <option value="pie" >Pie Chart</option>
                         </select>
@@ -52,9 +55,61 @@ Visualize Data | CRM
                     <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
                     <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
                 </form>
+
+
+                
             </div>
         </div>
     </div>
+    {% endif%}
+    {% if lead %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th> Status </th>
+                <th> Username </th>
+                <th> location </th>
+                <th> Managed by</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+           
+            {% for lead in leads %}
+            <tr>
+              <td>
+                <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
+                  <input type="hidden" name="account_name" value="{{ lead.username }}">
+                  <input type="hidden" name="form_id" value="{{ id }}">
+                
+                  
+                  <select id="status-{{ lead.username }}-{{ id }}" name="status">
+                    <option value="new">New Lead</option>
+                    <option value="engaged">Engaged Lead</option>
+                    <option value="qualified">Qualified Lead</option>
+                    <option value="converted">Converted Lead</option>
+                    <option value="lost">Lost Lead</option>
+                  </select>
+                 
+                </form>
+              </td>
+              <td>{{ lead.username }}</td>
+              <td>{{ lead.location }}</td>
+              <td>{{ lead.handled_by }}</td>
+              <!-- Display more fields as needed -->
+            </tr>
+            <script>
+              document.getElementById('status-{{ lead.username }}-{{ id }}').addEventListener('change', function() {
+                document.getElementById('lead-form-{{ lead.username }}-{{ id }}').submit();
+              });
+            </script>
+            {% endfor %}
+            
+                  
+        </tbody>
+    </table>
+    {%endif%}
+
     <div class="col-md-3"></div>
 </div>
 

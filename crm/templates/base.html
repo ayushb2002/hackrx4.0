@@ -40,17 +40,7 @@
                 <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
                     <span class="mdi mdi-menu"></span>
                 </button>
-                <div class="search-field d-none d-md-block">
-                    <form class="d-flex align-items-center h-100" action="#">
-                        <div class="input-group">
-                            <div class="input-group-prepend bg-transparent">
-                                <i class="input-group-text border-0 mdi mdi-magnify"></i>
-                            </div>
-                            <input type="text" class="form-control bg-transparent border-0"
-                                placeholder="Search projects">
-                        </div>
-                    </form>
-                </div>
+               
                 <ul class="navbar-nav navbar-nav-right">
                     <li class="nav-item nav-profile dropdown">
                         <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown"
@@ -200,6 +190,7 @@
                             <i class="mdi mdi-contacts menu-icon"></i>
                         </a>
                     </li> {% endcomment %}
+
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'dataVisualization' %}">
                             <span class="menu-title">Data Visualization</span>
@@ -207,6 +198,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'settings' %}">
+                            <span class="menu-title">settings</span>
+                            <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+                        </a>
+                    </li>
+                    {% comment %} <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="collapse" href="#general-pages" aria-expanded="false"
                             aria-controls="general-pages">
                             <span class="menu-title">Others</span>
@@ -218,7 +215,7 @@
                                 <li class="nav-item"> <a class="nav-link" href="{% url 'crmConnect' %}"> Connect </a></li>
                                 <li class="nav-item"> <a class="nav-link" href="{% url 'crmMessage' %}"> Message </a></li>
                             </ul>
-                        </div>
+                        </div> {% endcomment %}
                     {% endif%}
                     {% if user_type == "sales" %}
                     <li class="nav-item">

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Settings page
+{% endblock title %}
+
+{% block content %}
+<style>
+    /* CSS for form styling */
+    .form-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+  
+    .form-container label {
+        display: block;
+        margin-bottom: 8px;
+    }
+  
+    .form-container input[type="password"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 16px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+  
+    .form-container button[type="submit"] {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+  
+    .form-container button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+  
+    p.error {
+        color: red;
+    }
+  
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .container h2 {
+        margin-bottom: 20px;
+    }
+
+    .container form {
+        margin-bottom: 20px;
+    }
+  
+</style>
+
+<div class="container">
+    <h2>Change Password</h2>
+    <br><br>
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    <div class="form-container">
+        <form action="{% url 'change_password' %}" method="post">
+            {% csrf_token %}
+            <label for="current_password">Current Password:</label>
+            <input type="password" id="current_password" name="current_password" required>
+            <label for="new_password">New Password:</label>
+            <input type="password" id="new_password" name="new_password" required>
+            <label for="confirm_new_password">Confirm New Password:</label>
+            <input type="password" id="confirm_new_password" name="confirm_new_password" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+<br><br>
+    <h2>Schedule Data Scraping</h2>
+    <br><br>
+    <div class="form-container">
+        <form action="/submit_timings/" method="post">
+            {% csrf_token %}
+            
+            <label for="start_time">Start Time:</label>
+            <input type="time" id="start_time" name="start_time" required>
+            <br>
+        
+            <label for="end_time">End Time:</label>
+            <input type="time" id="end_time" name="end_time" required>
+            <br>
+        
+            <label for="interval">Scraping Interval:</label>
+            <select id="interval" name="interval" required>
+                <option value="1">Every Minute</option>
+                <option value="60">Every Hour</option>
+                <option value="custom">Custom Duration</option>
+            </select>
+            
+            <div id="custom_duration" style="display: none;">
+                <label for="custom_duration_input">Custom Duration (in minutes):</label>
+                <input type="number" id="custom_duration_input" name="custom_duration_input" min="1">
+            </div>
+            
+            <br>
+        
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+<script>
+    // JavaScript code to show/hide the custom duration input based on selected option
+    const intervalSelect = document.getElementById("interval");
+    const customDurationInput = document.getElementById("custom_duration");
+
+    intervalSelect.addEventListener("change", () => {
+        if (intervalSelect.value === "custom") {
+            customDurationInput.style.display = "block";
+            customDurationInput.querySelector("input").required = true;
+        } else {
+            customDurationInput.style.display = "none";
+            customDurationInput.querySelector("input").required = false;
+        }
+    });
+</script>
+{% endblock content %}

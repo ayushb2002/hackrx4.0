@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     'leads',
-    'facebook_scraper'
+    'facebook_scraper',
+    'django_celery_beat',
     
 ]
 
@@ -144,3 +145,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 import os
 from crm.settings import BASE_DIR
 file_path = os.path.join(BASE_DIR, 'relative_path')
+
+
+# Celery configurations
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'run_my_api_task': {
+        'task': 'path.to.tasks.my_api_task',
+        'schedule': crontab(minute=0), # Daily at midnight
+    },
+}

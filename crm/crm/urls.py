@@ -1,5 +1,5 @@
 from django.urls import path,include
-from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateDataForTwitter, generateDataForInsta, generateLeads, dataVisualization, crmConnect, crmMessage,sales_analytics,approve_employee_view,todo
+from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateDataForTwitter, generateDataForInsta, generateLeads, dataVisualization, crmConnect, crmMessage,sales_analytics,approve_employee_view,todo,settings,change_password_view
 from django.shortcuts import redirect
 
 urlpatterns = [
@@ -39,5 +39,7 @@ urlpatterns = [
     path('approve_employee/', approve_employee_view, name='approve_employee'),
     path('todo/', todo, name='todo'),
     # path('del/<str:item_id>', views.remove, name="del"),
+     path('settings/', settings, name='settings'),
+      path('change_password/', change_password_view, name='change_password'),
 
 ]
