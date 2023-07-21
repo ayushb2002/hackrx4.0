@@ -75,27 +75,18 @@ Visualize Data | CRM
         
         <tbody>
            
-            {% for lead in leads %}
+            {% for leads in lead %}
             <tr>
-              <td>
-                <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
-                  <input type="hidden" name="account_name" value="{{ lead.username }}">
-                  <input type="hidden" name="form_id" value="{{ id }}">
-                
-                  
-                  <select id="status-{{ lead.username }}-{{ id }}" name="status">
-                    <option value="new">New Lead</option>
-                    <option value="engaged">Engaged Lead</option>
-                    <option value="qualified">Qualified Lead</option>
-                    <option value="converted">Converted Lead</option>
-                    <option value="lost">Lost Lead</option>
-                  </select>
-                 
-                </form>
-              </td>
-              <td>{{ lead.username }}</td>
-              <td>{{ lead.location }}</td>
-              <td>{{ lead.handled_by }}</td>
+              
+                <td>{{ leads.status }}</td>
+              
+              <td>{{ leads.username }}</td>
+              <td>{{ leads.location }}</td>
+              {% if leads.handled_by == "accounts.Employee.None" %}
+                <td>Not Assigned yet</td>
+                {% else %}
+              <td>{{ leads.handled_by }}</td>
+          {% endif %}
               <!-- Display more fields as needed -->
             </tr>
             <script>
