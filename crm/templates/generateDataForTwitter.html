@@ -6,6 +6,17 @@ Generate Data from Twitter | CRM
 {% endblock title %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spinkit/2.0.0/spinkit.min.css" integrity="sha512-kRYkjiYH/VXxoiaDK2oGNMKIi8VQVfie1lkYGX3kmfzWNR2kfaF5ze0885W3/eE6lIiURBsZA91M/WNvCajHMw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+    /* Your loading circle CSS */
+    #loadingCircle {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
 
 <div class="page-header">
     <h3 class="page-title"> Personalize your search using filters </h3>
@@ -25,22 +36,61 @@ Generate Data from Twitter | CRM
             <div class="card-body">
                 <h4 class="card-title">Twitter search</h4>
                 <p class="card-description"> Generates upto 100 rows of data! </p>
-                <form class="forms-sample">
+
+                <form class="forms-sample" method="POST" action="{% url 'generateDataFromTwitter' %}" id="myForm">
+                    {% csrf_token %}
+
                     <div class="form-group">
                         <label for="exampleInputUsername1">Keywords</label>
-                        <input type="text" class="form-control" id="keywords" placeholder="Enter keywords">
+                        <input type="text" class="form-control" id="keywords" placeholder="Enter keywords" name="keywords">
                     </div>
                     <div class="form-group">
                         <label for="exampleInputEmail1">Until</label>
-                        <input type="date" class="form-control" id="untilDate" placeholder="Leads upto dd/mm/yyyy">
+                        <input type="date" class="form-control" id="until" name="until" placeholder="Leads upto dd/mm/yyyy">
                     </div>
                     <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
                     <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
                 </form>
+
+                <div id="loadingCircle">
+                   <img src="https://thumbs.gfycat.com/CheerfulGreatAmurstarfish-size_restricted.gif" alt="Loading..." />
             </div>
         </div>
     </div>
     <div class="col-md-3"></div>
 </div>
+<script>
+    // JavaScript code
+    document.getElementById("myForm").addEventListener("submit", (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        // Show the loading circle
+        document.getElementById("loadingCircle").style.display = "block";
+
+        // Prepare form data (if needed)
+        const formData = new FormData(event.target);
+
+        // Make the API request (form submission)
+        fetch("/generateDataFromTwitter/", {
+            method: "POST",
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Process the API response here
+                console.log(data);
+
+                // Hide the loading circle after the API call is complete
+                document.getElementById("loadingCircle").style.display = "none";
+            })
+            .catch(error => {
+                // Handle API errors here
+                console.error(error);
+
+                // Hide the loading circle in case of an error
+                document.getElementById("loadingCircle").style.display = "none";
+            });
+    });
+</script>
 
 {% endblock content %}

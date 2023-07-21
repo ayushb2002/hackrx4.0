@@ -457,11 +457,14 @@ def get_tweets(request):
             querystring['until'] = until
 
         headers = {
-            'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
+            # 'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
+            # 'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
+            'X-RapidAPI-Key': '7e7d825c09mshdf576f7bb75175ep1418b5jsnb9d3d7ad6763',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
         response = requests.get(url, headers=headers, params=querystring)
+        print(response)
         data = response.json()
         print(data)
 
@@ -500,7 +503,7 @@ def get_tweets(request):
         
         
         df = pd.DataFrame(data['statuses'])
-        print(df.columns)
+        print(df.head())
         
         #intent anaylsis
         intent=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
@@ -859,22 +862,217 @@ def dashboard(request):
             return render(request, 'dashboard.html',context=context)
 
 def generateLeads(request):
-    return render(request, 'generateLeads.html')
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+        "username":current_user,
+        "user_type":employee.position}
+    
+    return render(request, 'generateLeads.html',context=context)
 
 def generateDataForTwitter(request):
-    return render(request, "generateDataForTwitter.html")
+    if request.method == "POST":
+        keyword = request.POST.get('keywords')
+        print("keyword recieved -------",keyword)
+        count = 100  # Default count is set to 20 if not provided
+        # until = request.POST.get('until') 
+        
+
+        url = "https://twitter135.p.rapidapi.com/v1.1/SearchTweets/"
+        querystring = {"q": keyword, "count": count}
+
+        # if until:
+        #     querystring['until'] = until
+
+        headers = {
+            # 'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
+            # 'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
+            'X-RapidAPI-Key': '7e7d825c09mshdf576f7bb75175ep1418b5jsnb9d3d7ad6763',
+            'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
+        }
+
+        response = requests.get(url, headers=headers, params=querystring)
+        data = response.json()
+        print(data)
+
+        tweets = []
+        for status in data.get('statuses', []):
+            tweet = {
+                'created_at': status.get('created_at', ''),
+                'full_text': status.get('full_text', ''),
+                'user': {
+                    'name': status['user'].get('name', ''),
+                    'screen_name': status['user'].get('screen_name', ''),
+                    'location': status['user'].get('location', ''),
+                    'followers_count': status['user'].get('followers_count', 0),
+                    'friends_count': status['user'].get('friends_count', 0),
+                },
+                'lang': status.get('lang', ''),
+            }
+            print(tweet)
+            tweets.append(tweet)
+
+            # Store the tweet data in the database
+            Tweet.objects.create(
+                keyword=keyword,
+                created_at=status.get('created_at', ''),
+                full_text=status.get('full_text', ''),
+                user_name=status['user'].get('name', ''),
+                screen_name=status['user'].get('screen_name', ''),
+                location=status['user'].get('location', ''),
+                followers_count=status['user'].get('followers_count', 0),
+                friends_count=status['user'].get('friends_count', 0),
+                lang=status.get('lang', ''),
+            )
+            
+
+        # Retrieve all stored tweets from the database
+        stored_tweets = Tweet.objects.all().values()
+        
+        
+        df = pd.DataFrame(data['statuses'])
+        print(df.columns)
+        
+        #intent anaylsis
+        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+        def predict_intent(s):
+            s=[s]
+            d=intent.predict(intent_tfidf.transform(s))
+            if d[0][0] == 1:
+                return "enquiry"
+            elif d[0][1] == 1:
+                return "general talk"
+            else:
+                return "complaint"
+        df["intent"] = df["full_text"].apply(predict_intent)
+        value_counts = df["intent"].value_counts()
+        leads = []
+        for index, row in df.iterrows():
+            print(row['intent'])
+            if row['intent'] == 'enquiry':
+                leads.append((row['user']['screen_name'], row['user']['location']))
+        
+        #sentiment       
+        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+        def predict_sentiment(s):
+            s=[s]
+            d=sentiment.predict(sentiment_tfidf.transform(s))
+            if d[0]==1:
+                return "positive"
+            else:
+                return "negative"
+        df["sentiment"]=df["full_text"].apply(lambda x:predict_sentiment(x))
+        for index, row in df.iterrows():
+            print(row['sentiment'])
+            if row['sentiment'] == 'positive':
+                leads.append((row['user']['screen_name'], row['user']['location']))
+        
+        
+        for lead in leads:
+            username = lead[0]
+            location = lead[1]
+            handled_by = None  # Replace 'Your Employee Name' with the appropriate employee name or query
+            if not Lead.objects.filter(username=username).exists():
+                lead_obj = Lead.objects.create(username=username, location=location, status='new')
+                lead_obj.save()
+        
+        
+        
+        return redirect('generateDataFromTwitter')
+        
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+        "username":current_user,
+        "user_type":employee.position}
+    return render(request, "generateDataForTwitter.html",context=context)
 
 def generateDataForInsta(request):
-    return render(request, "generateDataForInsta.html")
+    if request.method=="POST":
+                hashtag = request.data.get('hashtag', '')
+                # Retrieve existing results from the database
+                existing_results = InstagramPost.objects.filter(hashtag=hashtag)
+
+                
+                
+                hashtag = request.data.get('hashtag', '')
+                
+                conn = http.client.HTTPSConnection("scraper-api.smartproxy.com")
+                payload = json.dumps({
+                    "target": "instagram_graphql_hashtag",
+                    "url": f"https://www.instagram.com/explore/tags/{hashtag}/",
+                    "locale": "en",
+                    "geo": "India"
+                })
+                headers = {
+                    'Accept': 'application/json',
+                    'Authorization': 'Basic UzAwMDAxMTExMjE6UCRXMTM5YThjMmQwNTM2NTg2MmI5ZTk0Y2IzZjM3NzAzMzJj',
+                    'Content-Type': 'application/json'
+                }
+                conn.request("POST", "/v1/scrape", payload, headers)
+                res = conn.getresponse()
+                data = json.loads(res.read().decode("utf-8"))
+                result = []
+
+                if 'data' in data:
+                    data = data['data']
+                    if 'content' in data:
+                        content = data['content']
+                        if content is not None and 'hashtag' in content:
+                            hashtag_data = content['hashtag']
+                            if 'edge_hashtag_to_media' in hashtag_data:
+                                edges = hashtag_data['edge_hashtag_to_media'].get('edges', [])
+                                post_links = [f"https://www.instagram.com/p/{edge['node']['shortcode']}/" for edge in edges]
+
+                                # Retrieve existing results
+                                for post in existing_results:
+                                    result.append({'post_link': post.post_link})
+
+                                # Save new results obtained from the API
+                                for link in post_links:
+                                    # Check if the data already exists in the model
+                                    try:
+                                        existing_post = InstagramPost.objects.get(post_link=link)
+                                        result.append({'post_link': existing_post.post_link})
+                                    except InstagramPost.DoesNotExist:
+                                        # Save the new post in the database
+                                        new_post = InstagramPost.objects.create(hashtag=hashtag, post_link=link)
+                                        result.append({'post_link': new_post.post_link})
+
+                return redirect('generateDataFromInsta')
+        
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+        "username":current_user,
+        "user_type":employee.position}
+    return render(request, "generateDataForInsta.html",context=context)
 
 def dataVisualization(request):
-    return render(request, "dataVisualization.html")
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+        "username":current_user,
+        "user_type":employee.position}
+    return render(request, "dataVisualization.html",context=context)
 
 def crmConnect(request):
-    return render(request, "connect.html")
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+        "username":current_user,
+        "user_type":employee.position}
+    return render(request, "connect.html",context=context)
 
 def crmMessage(request):
-    return render(request, "message.html")
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+        "username":current_user,
+        "user_type":employee.position}
+    return render(request, "message.html",context=context)
 
 def sales_analytics(request):
     current_user = request.user
@@ -894,3 +1092,7 @@ def sales_analytics(request):
         "stats":status_chart
     }
     return render(request, "sales_anaylsis.html",context=context)
+
+
+def todo(request):
+    return render(request, "todo.html")

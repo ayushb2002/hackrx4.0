@@ -171,6 +171,12 @@
                             <i class="mdi mdi-home menu-icon"></i>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'todo' %}">
+                            <span class="menu-title">To do</span>
+                            <i class="mdi mdi-home menu-icon"></i>
+                        </a>
+                    </li>
                     {% if user_type == "manager" %}
                     <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false"
@@ -188,12 +194,12 @@
                             </ul>
                         </div>
                     </li>
-                    <li class="nav-item">
+                    {% comment %} <li class="nav-item">
                         <a class="nav-link" href="{% url 'generateLeads' %}">
                             <span class="menu-title">Generate Leads</span>
                             <i class="mdi mdi-contacts menu-icon"></i>
                         </a>
-                    </li>
+                    </li> {% endcomment %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'dataVisualization' %}">
                             <span class="menu-title">Data Visualization</span>
