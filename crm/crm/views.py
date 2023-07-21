@@ -526,9 +526,11 @@ def get_tweets(request):
         value_counts = df["intent"].value_counts()
         leads = []
         for index, row in df.iterrows():
-            print(row['intent'])
-            if row['intent'] == 'enquiry':
-                leads.append((row['user']['screen_name'], row['user']['location']))
+            # ... (omitting the existing code for brevity)
+
+            # Get the predicted service using the ML model
+
+            leads.append((row['user']['screen_name'], row['user']['location']))
         
         #sentiment       
         sentiment=pkl.load(open("/anush/Projects/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
@@ -854,6 +856,7 @@ def dashboard(request):
                 "employee_req":req,
                 "top_performers": employee_lead_counts
                 }
+                
             else:
                 count_leads = Lead.objects.count()
                 leads = Lead.objects.all()
@@ -879,7 +882,7 @@ def generateDataForTwitter(request):
     if request.method == "POST":
         keyword = request.POST.get('keywords')
         print("keyword received -------", keyword)
-        count = 5  # Default count is set to 20 if not provided
+        count = 50  # Default count is set to 20 if not provided
         # until = request.POST.get('until') 
 
         url = "https://twitter135.p.rapidapi.com/v1.1/SearchTweets/"
@@ -934,6 +937,7 @@ def generateDataForTwitter(request):
 
         leads_generated = []
         df = pd.DataFrame(data['statuses'])
+        
         print(df.columns)
         if 'statuses' in data and data['statuses']:
             # If the 'statuses' field is not empty, proceed with creating the DataFrame
@@ -945,12 +949,12 @@ def generateDataForTwitter(request):
             context={
                 'message':message
             }
-            
-            return redirect('generateDataFromTwitter')
+            return render(request, 'generateLeads.html',context=context)
+        
         
         #intent anaylsis
-        intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
-        intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
+        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
+        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
         def predict_intent(s):
             s = [s]
             d = intent.predict(intent_tfidf.transform(s))
@@ -982,8 +986,8 @@ def generateDataForTwitter(request):
             if row['intent'] == 'enquiry':
                 leads.append((row['user']['screen_name'], row['user']['location']))
         
-        sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
-        sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
+        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
+        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
         def predict_sentiment(s):
             s = [s]
             d = sentiment.predict(sentiment_tfidf.transform(s))
@@ -1008,8 +1012,8 @@ def generateDataForTwitter(request):
             if row['sentiment'] == 'positive':
                 leads.append((row['user']['screen_name'], row['user']['location']))
 
-        service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
-        service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
+        service = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl", "rb"))
+        service_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl", "rb"))
 
         def predict_service(s):
             s = [s]
@@ -1033,7 +1037,7 @@ def generateDataForTwitter(request):
             card = service['card']
         else:
             card = 0
-        if "service" in service.index:
+        if "EMI" in service.index:
             emi = service['EMI']
         else:
             emi = 0
@@ -1047,6 +1051,11 @@ def generateDataForTwitter(request):
             investment = 0
         service_link = "https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:[" + str(card) + "," + str(emi) + "," + str(loan) + "," + str(investment) + "],fill:false,borderColor:'blue'}]}}"
 
+        generated_leads = []
+        for index, row in df.iterrows():
+            print(row['intent'])
+            leads.append((row['user']['screen_name'], row['user']['location']))
+            generated_leads.append((row['user']['screen_name'], row['user']['location'],row['service']))         
         for lead in leads:
             username = lead[0]
             location = lead[1]
@@ -1059,15 +1068,30 @@ def generateDataForTwitter(request):
         print(res_link)
         print(intent_link)
         print(service_link)
+        
         context = {
             "username": current_user,
             "user_type": employee.position,
             "response_link": res_link,
             "intent_link": intent_link,
-            "service_link": service_link
+            "service_link": service_link,
+            "positive": positive,
+            "negative": negative,
+            
+            "card":card,
+            "emi":emi,
+            "loan":loan,
+            "investment":investment,
+           
+            
+            "general talk": general,
+            "complaint": complaint,
+            "enquiry": enquiry,
+            
+            "leads": generated_leads,
         }
 
-        return render(request, "dashboard.html", context=context)
+        return render(request, "analysis.html", context=context)
 
     current_user = request.user
     employee = Employee.objects.get(email=current_user)

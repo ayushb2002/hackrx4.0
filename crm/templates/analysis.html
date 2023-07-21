@@ -1,3 +1,6 @@
+
+
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -6,13 +9,52 @@
 {% endblock title %}
 
 {% block content %}
-{{response_link}}
-{{intent_link}}
-{{service_link}}
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ccc;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>
+
 <img src="{{response_link}}" alt="Loading..."  width="55%"/>
-<img src="{{intent_link}}" alt="Loading..." />
-<img src="{{service_link}}" alt="Loading..." />
+<img src="{{intent_link}}" alt="Loading..." width="55%" />
+<img src="{{service_link}}" alt="Loading..." width="55%"/>
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Location</th>
+            <th>Predicted Service</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lead in leads %}
+        <tr>
+            <td><a href="https://twitter.com/{{ lead.0 }}" target="_blank">{{ lead.0 }}</a></td><!-- The first element (username) of the tuple -->
+            <td>{{ lead.1 }}</td>  <!-- The second element (location) of the tuple -->
+            <td>{{ lead.2 }}</td>  <!-- The third element (predicted service) of the tuple -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 
-<img src="{{stats}}" width="50%">
 {% endblock content %}
+
+
