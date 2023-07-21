@@ -6,13 +6,6 @@ To do
 {% endblock title %}
 
 {% block content %}
-<style>
-.content-wrapper {
-    width: 200px; /* Set the width of the container */
-    word-wrap: break-word; /* or use overflow-wrap: break-word; */
-}
-</style>
-
 
 <div class="container">
     <div class="row">
@@ -41,13 +34,9 @@ To do
                         <tbody>
                             {% for lead in leads %}
                             <tr>
-                                {% if type == "insta"%}
-                                <td><a href="https://www.instagram.com/{{ lead.0 }}" target="_blank">{{ lead.0 }}</a></td>
-                                {% else %}
                                 <td><a href="https://twitter.com/{{ lead.0 }}" target="_blank">{{ lead.0 }}</a></td>
-                                {%endif%}
                                 <!-- The first element (username) of the tuple -->
-                                <td class="content-wrapper">{{ lead.1 }}</td> <!-- The second element (location) of the tuple -->
+                                <td>{{ lead.1 }}</td> <!-- The second element (location) of the tuple -->
                                 <td>{{ lead.2 }}</td> <!-- The third element (predicted service) of the tuple -->
                             </tr>
                             {% endfor %}
