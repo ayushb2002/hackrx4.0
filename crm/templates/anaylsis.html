@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+   To do
+{% endblock title %}
+
+{% block content %}
+<img src="{{response_link}}" alt="Loading..."  width="55%"/>
+<img src="{{intent_link}}" alt="Loading..." />
+<img src="{{service_link}}" alt="Loading..." />
+
+
+<img src="{{stats}}" width="50%">
+{% endblock content %}

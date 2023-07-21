@@ -28,7 +28,7 @@ Generate Data from Twitter | CRM
         </ol>
     </nav>
 </div>
-
+{% if not response_link %}
 <div class="row">
     <div class="col-md-3"></div>
     <div class="col-md-6 grid-margin stretch-card">
@@ -53,14 +53,25 @@ Generate Data from Twitter | CRM
                 </form>
 
                 <div id="loadingCircle">
-                   <img src="https://thumbs.gfycat.com/CheerfulGreatAmurstarfish-size_restricted.gif" alt="Loading..." />
+                   <img src="https://funnelexpertph.com/hosted/images/47/613fb10da2468cb276fd57b209d6a1/Gears-GIF.gif" alt="Loading..." />
             </div>
         </div>
         {{message}}
     </div>
 
+{% endif %}
+
+
+
+
     <div class="col-md-3"></div>
 </div>
+{{response_link}}
+{{intent_link}}
+{{service_link}}
+<img src="{{response_link}}" alt="Loading..."  width="55%"/>
+<img src="{{intent_link}}" alt="Loading..." />
+<img src="{{service_link}}" alt="Loading..." />
 <script>
     // JavaScript code
     document.getElementById("myForm").addEventListener("submit", (event) => {

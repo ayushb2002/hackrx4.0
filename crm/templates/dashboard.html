@@ -82,18 +82,36 @@ Dashboard | CRM
                                 <th> Username </th>
                                 <th> location </th>
                                 <th> Managed by</th>
+                                <th>Allot to</th>
                             </tr>
                         </thead>
                         <tbody>
                            
                                 {% for lead in leads %}
                                 <tr>
+                                    <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
+                                        <input type="hidden" name="lead_name" value="{{ lead.username }}">
+                                        <input type="hidden" name="form_id" value="{{ id }}">
                                     <td>{{ lead.status }}</td>
                                     <td>{{ lead.username }}</td>
                                     <td>{{ lead.location }}</td>
                                     <td>{{ lead.handled_by }}</td>
-                                    <!-- Display more fields as needed -->
+                                    
+                                        <td>
+                                            <select id="status-{{ lead.username }}-{{ id }}" name="status">
+                                                
+                                               <option> working</option>
+                                               
+                                               
+                                                
+                                                
+                                        
+                                            </select>
+                                            
+                                        </td>
+
                                 </tr>
+                            </form>
                             {% endfor %}
                                   
                         </tbody>
