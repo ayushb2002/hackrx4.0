@@ -953,8 +953,8 @@ def generateDataForTwitter(request):
         
         
         #intent anaylsis
-        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+        intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
+        intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
         def predict_intent(s):
             s = [s]
             d = intent.predict(intent_tfidf.transform(s))
@@ -986,8 +986,8 @@ def generateDataForTwitter(request):
             if row['intent'] == 'enquiry':
                 leads.append((row['user']['screen_name'], row['user']['location']))
         
-        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+        sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
+        sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
         def predict_sentiment(s):
             s = [s]
             d = sentiment.predict(sentiment_tfidf.transform(s))
@@ -1012,8 +1012,8 @@ def generateDataForTwitter(request):
             if row['sentiment'] == 'positive':
                 leads.append((row['user']['screen_name'], row['user']['location']))
 
-        service = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl", "rb"))
-        service_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl", "rb"))
+        service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
+        service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
 
         def predict_service(s):
             s = [s]
@@ -1077,17 +1077,13 @@ def generateDataForTwitter(request):
             "service_link": service_link,
             "positive": positive,
             "negative": negative,
-            
             "card":card,
             "emi":emi,
             "loan":loan,
             "investment":investment,
-           
-            
             "general talk": general,
             "complaint": complaint,
             "enquiry": enquiry,
-            
             "leads": generated_leads,
         }
 
