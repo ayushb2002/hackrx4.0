@@ -943,13 +943,12 @@ def generateDataForTwitter(request):
             print(df.columns)
         else:
         # If the 'statuses' field is empty or doesn't exist, handle the error here
-           message="No tweets found"
-           context={
-               'message':message
-    
-           }
-           return redirect('generateDataFromTwitter')
-           
+            message="No tweets found"
+            context={
+                'message':message
+            }
+            
+            return redirect('generateDataFromTwitter')
         
         #intent anaylsis
         intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
@@ -985,7 +984,6 @@ def generateDataForTwitter(request):
             if row['intent'] == 'enquiry':
                 leads.append((row['user']['screen_name'], row['user']['location']))
         
-      
         sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
         sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
         def predict_sentiment(s):
