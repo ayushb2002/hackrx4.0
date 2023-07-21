@@ -462,9 +462,7 @@ def get_tweets(request):
             querystring['until'] = until
 
         headers = {
-            # 'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
-            # 'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
-            'X-RapidAPI-Key': '7e7d825c09mshdf576f7bb75175ep1418b5jsnb9d3d7ad6763',
+            'X-RapidAPI-Key': 'b6e219c59fmsh7bc8c7d3a548169p16351bjsnb91d80f04ecf',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
