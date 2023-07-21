@@ -51,55 +51,23 @@ Generate Data from Instagram | CRM
             <div class="card-body">
                 <h4 class="card-title">Instagram search</h4>
                 <p class="card-description"> Search by hashtag </p>
+
+
                 <form class="forms-sample" method="POST" action="{% url 'generateDataFromInsta' %}" id="myFormm">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="exampleInputUsername1">Hashtag</label>
-                        <input type="text" class="form-control" id="hashtagContainer" placeholder="Enter hashtag without #" name="hashtag">
+                        <input type="text" class="form-control" id="tag" placeholder="Enter hashtag without #" name="tag">
                     </div>
                     <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
                     <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
                 </form>
             </div>
         </div>
-        <div id="loadingCircle">
-            <img src="https://funnelexpertph.com/hosted/images/47/613fb10da2468cb276fd57b209d6a1/Gears-GIF.gif" alt="Loading..." />
-     </div>
+       
     </div>
 </div>
-here
-<script>
-    // JavaScript code
-    document.getElementById("myFormm").addEventListener("submit", (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
 
-        // Show the loading circle
-        document.getElementById("loadingCircle").style.display = "block";
 
-        // Prepare form data (if needed)
-        const formData = new FormData(event.target);
-
-        // Make the API request (form submission)
-        fetch("/generateDataFromTwitter/", {
-            method: "POST",
-            body: formData,
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Process the API response here
-                console.log(data);
-
-                // Hide the loading circle after the API call is complete
-                document.getElementById("loadingCircle").style.display = "none";
-            })
-            .catch(error => {
-                // Handle API errors here
-                console.error(error);
-
-                // Hide the loading circle in case of an error
-                document.getElementById("loadingCircle").style.display = "none";
-            });
-    });
-</script>
 
 {% endblock content %}
