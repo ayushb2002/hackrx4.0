@@ -712,6 +712,7 @@ def dashboard(request):
     if request.method=="POST":
             form_id = request.POST.get('form_id')
             print(form_id)
+            model_folder = settings.BASE_DIR / 'model'
             if form_id == 'emp_req':
                 employee_id = request.POST.get('employee_id')
                 print(employee_id)
@@ -932,10 +933,10 @@ def generateDataForTwitter(request):
         
         df = pd.DataFrame(data['statuses'])
         print(df.columns)
-        
+        model_folder = settings.BASE_DIR / 'model'
         #intent anaylsis
-        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+        intent=pkl.load(open(os.path.join(model_folder, os.path.basename("intent_classification.pkl")),"rb"))
+        intent_tfidf=pkl.load(open(os.path.join(model_folder, os.path.basename("intent_classification_tfidf.pkl")),"rb"))
         def predict_intent(s):
             s=[s]
             d=intent.predict(intent_tfidf.transform(s))
@@ -954,16 +955,24 @@ def generateDataForTwitter(request):
                 leads.append((row['user']['screen_name'], row['user']['location']))
         
         #sentiment       
-        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
-        def predict_sentiment(s):
-            s=[s]
-            d=sentiment.predict(sentiment_tfidf.transform(s))
-            if d[0]==1:
-                return "positive"
-            else:
-                return "negative"
-        df["sentiment"]=df["full_text"].apply(lambda x:predict_sentiment(x))
+        service=pkl.load(open(os.path.join(model_folder, os.path.basename("service_model.pkl")),"rb"))
+        service_tfidf=pkl.load(open(os.path.join(model_folder, os.path.basename('service_model_tfidf.pkl')),"rb"))
+        def predict_service(s):
+                    s=[s]
+                    d=service.predict(service_tfidf.transform(s))
+                    if d[0][0]==1:
+                        return "EMI"
+                    elif d[0][1]==1:
+                        return "insurance"
+                    elif d[0][2]==1:
+                        return "investment"
+                    elif d[0][3]==1:
+                        return "loan"
+                    elif d[0][4]==1:
+                        return "savings"
+                    else:
+                        return "card"
+        df["sentiment"]=df["full_text"].apply(lambda x:predict_service(x))
         for index, row in df.iterrows():
             print(row['sentiment'])
             if row['sentiment'] == 'positive':
