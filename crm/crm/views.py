@@ -890,9 +890,7 @@ def generateDataForTwitter(request):
         #     querystring['until'] = until
 
         headers = {
-            # 'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
-            # 'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
-            'X-RapidAPI-Key': 'd44b792600msh7b88ddb66d5d54fp1f9d61jsn5d1db7832743',
+            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
