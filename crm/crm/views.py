@@ -883,10 +883,9 @@ def generateLeads(request):
 def generateDataForTwitter(request):
     if request.method == "POST":
         keyword = request.POST.get('keywords')
-        print("keyword recieved -------",keyword)
+        print("keyword received -------", keyword)
         count = 5  # Default count is set to 20 if not provided
         # until = request.POST.get('until') 
-        
 
         url = "https://twitter135.p.rapidapi.com/v1.1/SearchTweets/"
         querystring = {"q": keyword, "count": count}
@@ -898,7 +897,7 @@ def generateDataForTwitter(request):
             # 'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
             # 'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
             'X-RapidAPI-Key': 'd44b792600msh7b88ddb66d5d54fp1f9d61jsn5d1db7832743',
-        'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
+            'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
         response = requests.get(url, headers=headers, params=querystring)
@@ -934,129 +933,126 @@ def generateDataForTwitter(request):
                 friends_count=status['user'].get('friends_count', 0),
                 lang=status.get('lang', ''),
             )
-            
 
         # Retrieve all stored tweets from the database
         # stored_tweets = Tweet.objects.all().values()
-        
-        leads_generated=[]
+
+        leads_generated = []
         df = pd.DataFrame(data['statuses'])
         print(df.columns)
         if 'statuses' in data and data['statuses']:
-        # If the 'statuses' field is not empty, proceed with creating the DataFrame
+            # If the 'statuses' field is not empty, proceed with creating the DataFrame
             df = pd.DataFrame(data['statuses'])
             print(df.columns)
         else:
-        # If the 'statuses' field is empty or doesn't exist, handle the error here
-           message="No tweets found"
-           context={
-               'message':message
-    
-           }
-           return redirect('generateDataFromTwitter')
-           
-        
-        #intent anaylsis
-        intent=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl","rb"))
-        intent_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl","rb"))
+            # If the 'statuses' field is empty or doesn't exist, handle the error here
+            message = "No tweets found"
+            context = {
+                'message': message
+            }
+            return redirect('generateDataFromTwitter')
+
+        # intent analysis
+        intent = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification.pkl", "rb"))
+        intent_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/intent_classification_tfidf.pkl", "rb"))
+
         def predict_intent(s):
-            s=[s]
-            d=intent.predict(intent_tfidf.transform(s))
+            s = [s]
+            d = intent.predict(intent_tfidf.transform(s))
             if d[0][0] == 1:
                 return "enquiry"
             elif d[0][1] == 1:
                 return "general talk"
             else:
                 return "complaint"
+
         df["intent"] = df["full_text"].apply(predict_intent)
         value_counts = df["intent"].value_counts()
         if "general talk" in value_counts.index:
-            general=value_counts['general talk']
+            general = value_counts['general talk']
         else:
-            general=0
+            general = 0
         if "complaint" in value_counts.index:
-            complaint=value_counts['complaint']
+            complaint = value_counts['complaint']
         else:
-            complaint=0
+            complaint = 0
         if "enquiry" in value_counts.index:
-
-            enquiry=value_counts['enquiry']
+            enquiry = value_counts['enquiry']
         else:
-            enquiry=0
-        intent_link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:["+str(general)+","+str(complaint)+","+str(enquiry)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+            enquiry = 0
+        intent_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:[" + str(general) + "," + str(complaint) + "," + str(enquiry) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
         leads = []
         for index, row in df.iterrows():
             print(row['intent'])
             if row['intent'] == 'enquiry':
                 leads.append((row['user']['screen_name'], row['user']['location']))
-        
-      
-        sentiment=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl","rb"))
-        sentiment_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl","rb"))
+
+        sentiment = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_clf.pkl", "rb"))
+        sentiment_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/sentiment_tfidf.pkl", "rb"))
+
         def predict_sentiment(s):
-            s=[s]
-            d=sentiment.predict(sentiment_tfidf.transform(s))
-            if d[0]==1:
+            s = [s]
+            d = sentiment.predict(sentiment_tfidf.transform(s))
+            if d[0] == 1:
                 return "positive"
             else:
                 return "negative"
-            
-        df["sentiment"]=df["full_text"].apply(lambda x:predict_sentiment(x))
+
+        df["sentiment"] = df["full_text"].apply(lambda x: predict_sentiment(x))
         response = df["sentiment"].value_counts()
         if "positive" in response.index:
-            positive=response['positive']
+            positive = response['positive']
         else:
-            positive=0
+            positive = 0
         if "negative" in response.index:
-            negative=response['negative']
+            negative = response['negative']
         else:
-            negative=0
-        res_link="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:["+str(positive)+","+str(negative)+"]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+            negative = 0
+        res_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:[" + str(positive) + "," + str(negative) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
         for index, row in df.iterrows():
-            
-            
             print(row['sentiment'])
             if row['sentiment'] == 'positive':
                 leads.append((row['user']['screen_name'], row['user']['location']))
-        
-        
-        service=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl","rb"))
-        service_tfidf=pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl","rb"))
+
+        service = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model.pkl", "rb"))
+        service_tfidf = pkl.load(open("/Users/harshdhariwal/Desktop/crm_main/hackrx4.0/Service Classification/model/service_model_tfidf.pkl", "rb"))
+
         def predict_service(s):
-            s=[s]
-            d=service.predict(service_tfidf.transform(s))
-            if d[0][0]==1:
+            s = [s]
+            d = service.predict(service_tfidf.transform(s))
+            if d[0][0] == 1:
                 return "EMI"
-            elif d[0][1]==1:
+            elif d[0][1] == 1:
                 return "insurance"
-            elif d[0][2]==1:
+            elif d[0][2] == 1:
                 return "investment"
-            elif d[0][3]==1:
+            elif d[0][3] == 1:
                 return "loan"
-            elif d[0][4]==1:
+            elif d[0][4] == 1:
                 return "savings"
             else:
                 return "card"
-        df["service"]=df["full_text"].apply(lambda x:predict_service(x))
-        service=df["service"].value_counts()
+
+        df["service"] = df["full_text"].apply(lambda x: predict_service(x))
+        service = df["service"].value_counts()
         if "card" in service.index:
-            card=service['card']
+            card = service['card']
         else:
-            card=0
+            card = 0
         if "service" in service.index:
-            emi=service['EMI']
+            emi = service['EMI']
         else:
-            emi=0
+            emi = 0
         if "loan" in service.index:
-            loan=service['loan']
+            loan = service['loan']
         else:
-            loan=0
+            loan = 0
         if "investment" in service.index:
             investment = service['investment']
         else:
-            investment=0
-        service_link="https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:["+str(card)+","+str(emi)+","+str(loan)+","+str(investment)+"],fill:false,borderColor:'blue'}]}}"
-        
+            investment = 0
+        service_link = "https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:[" + str(card) + "," + str(emi) + "," + str(loan) + "," + str(investment) + "],fill:false,borderColor:'blue'}]}}"
+
         for lead in leads:
             username = lead[0]
             location = lead[1]
@@ -1069,23 +1065,24 @@ def generateDataForTwitter(request):
         print(res_link)
         print(intent_link)
         print(service_link)
-        context={
-        "username":current_user,
-        "user_type":employee.position,
-        "response_link":res_link,
-        "intent_link":intent_link,
-        "service_link":service_link
+        context = {
+            "username": current_user,
+            "user_type": employee.position,
+            "response_link": res_link,
+            "intent_link": intent_link,
+            "service_link": service_link
         }
-        return render(request, "anaylsis.html",context=context)
-        
+
+        return render(request, "dashboard.html", context=context)
+
     current_user = request.user
     employee = Employee.objects.get(email=current_user)
-    context={
-        "username":current_user,
-        "user_type":employee.position,
-        
-        }
-    return render(request, "generateDataForTwitter.html",context=context)
+    context = {
+        "username": current_user,
+        "user_type": employee.position,
+    }
+    return render(request, "generateDataForTwitter.html", context=context)
+
 
 def generateDataForInsta(request):
     if request.method=="POST":
@@ -1225,6 +1222,13 @@ def settings(request):
     return render(request, "settings.html",context=context)
 from django.contrib.auth.decorators import login_required
 
+from django.shortcuts import render
+
+def analysis(request):
+    print("came here")
+    return render(request, "analysis.html")
+
+
 @login_required
 def change_password_view(request):
     if request.method == 'POST':
@@ -1249,5 +1253,3 @@ def change_password_view(request):
     return render(request, 'settings.html')
 
 
-def anaylsis(requests):
-    return render(requests, "anaylsis.html")
