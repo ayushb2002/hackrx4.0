@@ -890,7 +890,9 @@ def generateDataForTwitter(request):
         #     querystring['until'] = until
 
         headers = {
-            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
+            # 'X-RapidAPI-Key': 'cc8d44e175mshcaabe692fb45fc0p104c66jsn0762ffe8c38b',
+            # 'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
+            'X-RapidAPI-Key': 'd44b792600msh7b88ddb66d5d54fp1f9d61jsn5d1db7832743',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
@@ -1285,25 +1287,151 @@ def generateDataForInsta(request):
             }
     return render(request, "generateDataForInsta.html",context=context)
 
-
+from leads.models import Tweet
 from leads.models import Lead
 def dataVisualization(request):
     if request.method=="POST":
-        service=request.POST.get('service')
-        social_media=request.POST.get('social_media')
-        chart=request.POST.get('chart')
-        current_user = request.user
-        employee = Employee.objects.get(email=current_user)
-        leads = Lead.objects.all()
+                keyword=request.POST.get('keyword')
+                social_media=request.POST.get('social_media')
+                print(keyword,social_media)
+                qualify=Tweet.objects.filter(keyword=keyword)
+                comments_data = []
+                for obj in qualify:
+                    username=obj.user_name
+                    comment=obj.full_text
+                    comments_data.append({'username':username,'comment':comment})
+                df = pd.DataFrame(comments_data)
+                print(df)
+         #intent anaylsis
+                intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
+                intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
+                def predict_intent(s):
+                    s = [s]
+                    d = intent.predict(intent_tfidf.transform(s))
+                    if d[0][0] == 1:
+                        return "enquiry"
+                    elif d[0][1] == 1:
+                        return "general talk"
+                    else:
+                        return "complaint"
+
+                df["intent"] = df["comment"].apply(predict_intent)
+                value_counts = df["intent"].value_counts()
+                if "general talk" in value_counts.index:
+                    general = value_counts['general talk']
+                else:
+                    general = 0
+                if "complaint" in value_counts.index:
+                    complaint = value_counts['complaint']
+                else:
+                    complaint = 0
+                if "enquiry" in value_counts.index:
+                    enquiry = value_counts['enquiry']
+                else:
+                    enquiry = 0
+                intent_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:[" + str(general) + "," + str(complaint) + "," + str(enquiry) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                leads = []
+                
+                for index, row in df.iterrows():
+                    print(row['intent'])
+                    if row['intent'] == 'enquiry':
+                        leads.append((row['username'],row['bio']))
+                
+                sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
+                sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
+                def predict_sentiment(s):
+                    s = [s]
+                    d = sentiment.predict(sentiment_tfidf.transform(s))
+                    if d[0] == 1:
+                        return "positive"
+                    else:
+                        return "negative"
+
+                df["sentiment"] = df["comment"].apply(lambda x: predict_sentiment(x))
+                response = df["sentiment"].value_counts()
+                if "positive" in response.index:
+                    positive = response['positive']
+                else:
+                    positive = 0
+                if "negative" in response.index:
+                    negative = response['negative']
+                else:
+                    negative = 0
+                res_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:[" + str(positive) + "," + str(negative) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                for index, row in df.iterrows():
+                    print(row['sentiment'])
+                    if row['sentiment'] == 'positive':
+                        leads.append((row['username'], row['bio']))
+
+                service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
+                service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
+
+                def predict_service(s):
+                    s = [s]
+                    d = service.predict(service_tfidf.transform(s))
+                    if d[0][0] == 1:
+                        return "EMI"
+                    elif d[0][1] == 1:
+                        return "insurance"
+                    elif d[0][2] == 1:
+                        return "investment"
+                    elif d[0][3] == 1:
+                        return "loan"
+                    elif d[0][4] == 1:
+                        return "savings"
+                    else:
+                        return "card"
+
+                df["service"] = df["comment"].apply(lambda x: predict_service(x))
+                service = df["service"].value_counts()
+                if "card" in service.index:
+                    card = service['card']
+                else:
+                    card = 0
+                if "EMI" in service.index:
+                    emi = service['EMI']
+                else:
+                    emi = 0
+                if "loan" in service.index:
+                    loan = service['loan']
+                else:
+                    loan = 0
+                if "investment" in service.index:
+                    investment = service['investment']
+                else:
+                    investment = 0
+                service_link = "https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:[" + str(card) + "," + str(emi) + "," + str(loan) + "," + str(investment) + "],fill:false,borderColor:'blue'}]}}"
+
+                generated_leads = []
+                for index, row in df.iterrows():
+                    print(row['intent'])
+                    leads.append((row['username'], row['bio']))
+                    generated_leads.append((row['username'], row['bio'],row['service']))         
+                # for lead in leads:
+                #     username = lead[0]
+                #     location = lead[1]
+                #     handled_by = None  # Replace 'Your Employee Name' with the appropriate employee name or query
+                #     if not Lead.objects.filter(username=username).exists():
+                #         lead_obj = Lead.objects.create(username=username, location=location, status='new')
+                #         lead_obj.save()
+                current_user = request.user
+                employee = Employee.objects.get(email=current_user)
+                print(res_link)
+                print(intent_link)
+                print(service_link)
+            
+        
+        
         
 
-        
-        context={
-            "username":current_user,
-            "user_type":employee.position,
-            "lead":leads,
-            }
-        return render(request, "dataVisualization.html",context=context)
+                current_user = request.user
+                employee = Employee.objects.get(email=current_user)
+                context={
+                    "username":current_user,
+                    "user_type":employee.position
+
+                    }
+                return render(request, "dataVisualization.html",context=context)
         
         
     current_user = request.user
