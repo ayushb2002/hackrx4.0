@@ -1699,3 +1699,15 @@ def competitorAnalysis(request):
         }
 
         return render(request, "analyzeCompetitors.html", context)
+    
+def dataFilter(request):
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    if request.method == "GET":
+        context={
+            "username":current_user,
+            "user_type":employee.position
+            }
+        return render(request, "dataFilter.html", context)
+    elif request.method == "POST":
+        pass
