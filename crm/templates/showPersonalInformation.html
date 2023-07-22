@@ -21,6 +21,8 @@ To do
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">Profile Analysis</h4>
+
+                {% if person %}
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -49,6 +51,29 @@ To do
                         </tr>
                     </tbody>
                 </table>
+                {% else %}
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th> Name </th>
+                            <th> Class </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-1">
+                                <img src="{% static 'assets/images/faces-clipart/pic-2.png' %}" alt="image" />
+                            </td>
+                            <td> {{ name }} </td>
+                            <td> {{ type }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {% endif %}
+
             </div>
         </div>
     </div>

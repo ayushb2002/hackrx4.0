@@ -35,7 +35,6 @@ To do
                                 <th>Username</th>
                                 <th>Full Name</th>
                                 <th>Location/Predicted Service</th>
-                                <th>Content</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,7 +48,9 @@ To do
                                 <!-- The first element (username) of the tuple -->
                                 <td><a href="{% url 'profileClassify' name=lead.1 %}">{{ lead.1 }}</a></td> <!-- The second element (location) of the tuple -->
                                 <td class="content-wrapper">{{ lead.2 }}</td> <!-- The third element (predicted service) of the tuple -->
+                                {% if lead.3 %}
                                 <td class="content-wrapper">{{ lead.3 }}</td> <!-- The third element (predicted service) of the tuple -->
+                                {% endif %}
                                 <td> <a href="#">View here</a> </td>
                             </tr>
                             {% endfor %}

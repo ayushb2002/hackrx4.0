@@ -2006,6 +2006,18 @@ def dataFilter(request):
                     
                     return render(request,'analysis.html',context=context)
 
+import spacy
+
+def entity_recognition(text):
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(text)
+    entities = []
+    
+    for ent in doc.ents:
+        entities.append((ent.text, ent.label_))
+    
+    return entities
+
 def profileClassify(request, name):
     current_user = request.user
     employee = Employee.objects.get(email=current_user)
@@ -2016,58 +2028,72 @@ def profileClassify(request, name):
         except:
             first_name = name
             last_name = ''
-        api_key = "c24aa1d30b93da5e048677ae4d5e4b5c"
-        url = "https://v2.namsor.com/NamSorAPIv2/api2/json/originBatch"
-        url_gender = "https://v2.namsor.com/NamSorAPIv2/api2/json/genderFullBatch"
-        url_ethnicity = "https://v2.namsor.com/NamSorAPIv2/api2/json/diasporaBatch"
-        payload = {
-            "personalNames": [
-                {
-                "id": "1",
-                "firstName": first_name,
-                "lastName": last_name
+        sample_text = name+" z"
+        entities = entity_recognition(sample_text)
+        result = entities[0][1]
+        if result == "PERSON":
+            api_key = "c24aa1d30b93da5e048677ae4d5e4b5c"
+            url = "https://v2.namsor.com/NamSorAPIv2/api2/json/originBatch"
+            url_gender = "https://v2.namsor.com/NamSorAPIv2/api2/json/genderFullBatch"
+            url_ethnicity = "https://v2.namsor.com/NamSorAPIv2/api2/json/diasporaBatch"
+            payload = {
+                "personalNames": [
+                    {
+                    "id": "1",
+                    "firstName": first_name,
+                    "lastName": last_name
+                    }
+                ]
                 }
-            ]
+            headers = {
+                    "X-API-KEY": api_key,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
             }
-        headers = {
-                "X-API-KEY": api_key,
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-        }
-        
-        response = requests.request("POST", url, json=payload, headers=headers)
-        data = response.json()
-        countries = data["personalNames"][0]["countriesOriginTop"]
-        region = data["personalNames"][0]["regionOrigin"]
-        
-        response = requests.request("POST", url_ethnicity, json=payload, headers=headers)
-        data = response.json()
-        
-        ethnicities = data["personalNames"][0]["ethnicitiesTop"]
-        
-        payload = {
-            "personalNames": [
-                {
-                "id": "1",
-                "name": name
-                }
-            ]
-        }
-        
-        response = requests.request("POST", url_gender, json=payload, headers=headers)
-        data = response.json()
-        gender = data["personalNames"][0]["likelyGender"]
-        
-        context = {
-            "first": first_name.capitalize(),
-            "last": last_name.capitalize(),
-            "username":current_user,
-            "user_type":employee.position,
-            "countries": countries,
-            "ethnicities": ethnicities,
-            "globe": region,
-            "gender": gender.capitalize()
-        }
-        return render(request, "showPersonalInformation.html", context)
+            
+            response = requests.request("POST", url, json=payload, headers=headers)
+            data = response.json()
+            countries = data["personalNames"][0]["countriesOriginTop"]
+            region = data["personalNames"][0]["regionOrigin"]
+            
+            response = requests.request("POST", url_ethnicity, json=payload, headers=headers)
+            data = response.json()
+            
+            ethnicities = data["personalNames"][0]["ethnicitiesTop"]
+            
+            payload = {
+                "personalNames": [
+                    {
+                    "id": "1",
+                    "name": name
+                    }
+                ]
+            }
+            
+            response = requests.request("POST", url_gender, json=payload, headers=headers)
+            data = response.json()
+            gender = data["personalNames"][0]["likelyGender"]
+            
+            context = {
+                "person": True,
+                "first": first_name.capitalize(),
+                "last": last_name.capitalize(),
+                "username":current_user,
+                "user_type":employee.position,
+                "countries": countries,
+                "ethnicities": ethnicities,
+                "globe": region,
+                "gender": gender.capitalize()
+            }
+            return render(request, "showPersonalInformation.html", context)
+        else:
+            context = {
+                "person": False,
+                "name": name,
+                "username":current_user,
+                "user_type":employee.position,
+                "type": result
+            }
+            return render(request, "showPersonalInformation.html", context)
     else:
         return HttpResponse('Not found')
