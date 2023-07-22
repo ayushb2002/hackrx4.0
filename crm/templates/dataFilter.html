@@ -11,10 +11,33 @@ Data Filter
     <h3 class="page-title"> Data Filter </h3>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page"><a
-                    href="{% url 'dataFilter' %}">Data Filter</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'dataFilter' %}">Data Filter</a></li>
         </ol>
     </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Leads filter form</h4>
+                <p class="card-description"> Choose a lead </p>
+                <form class="forms-sample">
+                    <div class="form-group">
+                        <label for="selectLead">Lead</label>
+                        <select class="form-control form-control-lg" id="selectLead" name="lead">
+                            <option value="hot">Hot Lead</option>
+                            <option value="warm">Warm Lead</option>
+                            <option value="cold">Cold Lead</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock content %}
