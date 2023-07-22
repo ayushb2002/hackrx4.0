@@ -734,7 +734,7 @@ def dashboard(request):
                 lead.handled_by.add(form_id)
 
                 Employeeob = Employee.objects.get(id=form_id)
-            
+                
                 leads = Lead.objects.all()
                 count_leads = Lead.objects.count()
 
@@ -842,7 +842,8 @@ def dashboard(request):
                 ).values('name', 'converted_lead_count')
                 
                 print(employee_lead_counts)
-
+                employees = Employee.objects.all()
+                employee_names = [employee.name for employee in employees]
                 context= {
                 'username': username,
                 'user_type': user_type,
@@ -852,7 +853,8 @@ def dashboard(request):
                 "leads": leads,
                 "leads_generated": count_leads,
                 "employee_req":req,
-                "top_performers": employee_lead_counts
+                "top_performers": employee_lead_counts,
+                "employee":employee_names
                 }
                 
             else:
@@ -1295,12 +1297,12 @@ def dataVisualization(request):
                 qualify=Tweet.objects.filter(keyword=keyword)
                 comments_data = []
                 for obj in qualify:
-                    username=obj.user_name
+                    username=obj.screen_name
                     comment=obj.full_text
                     comments_data.append({'username':username,'comment':comment})
                 df = pd.DataFrame(comments_data)
                 print(df)
-         #intent anaylsis
+            #intent anaylsis
                 intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
                 intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
                 def predict_intent(s):
@@ -1333,7 +1335,7 @@ def dataVisualization(request):
                 for index, row in df.iterrows():
                     print(row['intent'])
                     if row['intent'] == 'enquiry':
-                        leads.append((row['username'],row['bio']))
+                        leads.append(row['username'])
                 
                 sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
                 sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
@@ -1359,7 +1361,7 @@ def dataVisualization(request):
                 for index, row in df.iterrows():
                     print(row['sentiment'])
                     if row['sentiment'] == 'positive':
-                        leads.append((row['username'], row['bio']))
+                        leads.append(row['username'])
 
                 service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
                 service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
@@ -1403,8 +1405,8 @@ def dataVisualization(request):
                 generated_leads = []
                 for index, row in df.iterrows():
                     print(row['intent'])
-                    leads.append((row['username'], row['bio']))
-                    generated_leads.append((row['username'], row['bio'],row['service']))         
+                    leads.append(row['username'])
+                    generated_leads.append((row['username'],row['service']))         
                 # for lead in leads:
                 #     username = lead[0]
                 #     location = lead[1]
@@ -1424,12 +1426,24 @@ def dataVisualization(request):
 
                 current_user = request.user
                 employee = Employee.objects.get(email=current_user)
-                context={
-                    "username":current_user,
-                    "user_type":employee.position
-
-                    }
-                return render(request, "dataVisualization.html",context=context)
+                context = {
+                    "username": current_user,
+                    "user_type": employee.position,
+                    "response_link": res_link,
+                    "intent_link": intent_link,
+                    "service_link": service_link,
+                    "positive": positive,
+                    "negative": negative,
+                    "card":card,
+                    "emi":emi,
+                    "loan":loan,
+                    "investment":investment,
+                    "general talk": general,
+                    "complaint": complaint,
+                    "enquiry": enquiry,
+                    "leads": generated_leads,
+                        }
+                return render(request, "analysis.html",context=context)
         
         
     current_user = request.user
@@ -1583,6 +1597,8 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 def competitorAnalysis(request):
+    import nltk
+    nltk.download('punkt')
     current_user = request.user
     employee = Employee.objects.get(email=current_user)
     if request.method == "GET":

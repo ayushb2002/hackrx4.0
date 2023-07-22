@@ -6,6 +6,8 @@ Dashboard | CRM
 {% endblock title %}
 
 {% block content %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
 <div class="page-header">
     <h3 class="page-title">
         <span class="page-title-icon bg-gradient-primary text-white me-2">
@@ -65,6 +67,37 @@ Dashboard | CRM
             </div>
         </div>
     </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="clearfix">
+                    <h4 class="card-title float-left">Account approvals</h4>
+                    <form method="POST" action="{% url 'approve_employee' %}" id="emp_req" name="emp_req">
+                        {% csrf_token %}
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Employee Name</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employee_req %}
+                                <tr>
+                                    <td>{{ employee.name }}</td>
+                                    <td>
+                                        <button type="submit" name="employee_id" value="{{ employee.id }}"
+                                            class="btn btn-success">Approve</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="row">
     <div class="col-md-7 grid-margin stretch-card">
@@ -84,7 +117,6 @@ Dashboard | CRM
                             </tr>
                         </thead>
                         <tbody>
-
                             {% for lead in leads %}
                             <tr>
                                 <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
@@ -93,21 +125,26 @@ Dashboard | CRM
                                     <td>{{ lead.status }}</td>
                                     <td>{{ lead.username }}</td>
                                     <td>{{ lead.location }}</td>
-                                    <td>{{ lead.handled_by }}</td>
-
+                                    <td>Not assigned yet</td>
                                     <td>
-                                        <select id="status-{{ lead.username }}-{{ id }}" name="status">
+                                        <select id="emp-allot" name="status">
 
-                                            <option> working</option>
-
-
-
-
+                                            <option value="">Harsh</option>
+                                            <option value="">ayush</option>
+                                            <option value="">harsh</option>
+                                            <option value="">ayush</option>
+                                            <option value="">Anusha2</option>
+                                            <option value="">harsh</option>
+                                            <option value="">Ayush</option>
+                                            <option value="">Ayush Bansal</option>
 
                                         </select>
-
                                     </td>
-
+                                    <td>
+                                        <select id="status-{{ lead.username }}-{{ id }}" name="status">
+                                            <option> working</option>
+                                        </select>
+                                    </td>
                             </tr>
                             </form>
                             {% endfor %}
@@ -190,50 +227,28 @@ Dashboard | CRM
         <div class="col-md-5 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <form method="POST" action="{% url 'approve_employee' %}" id="emp_req" name="emp_req">
-                        {% csrf_token %}
+                    <div class="clearfix">
+                        <h4 class="card-title float-left mb-5">Top performing sales employee</h4>
                         <table class="table">
+                            <br>
                             <thead>
                                 <tr>
                                     <th>Employee Name</th>
-                                    <th>Action</th>
+                                    <th>Leads generated</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for employee in employee_req %}
+                                {% for employee_lead in top_performers %}
                                 <tr>
-                                    <td>{{ employee.name }}</td>
+                                    <td>{{ employee_lead.name }}</td>
                                     <td>
-                                        <button type="submit" name="employee_id" value="{{ employee.id }}"
-                                            class="btn btn-success">Approve</button>
+                                        {{ employee_lead.converted_lead_count }}
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
-                    </form>
-                    <br><br>
-                    <table class="table">
-                        Top performing sales employee
-                        <br>
-                        <thead>
-                            <tr>
-                                <th>Employee Name</th>
-                                <th>Leads generated</th>
-                            </tr>
-                        </thead>
-                        {% for employee_lead in top_performers %}
-                        <tr>
-                            <td>{{ employee_lead.name }}</td>
-                            <td>
-                                {{ employee_lead.converted_lead_count }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        </thead>
-                    </table>
-                    <tbody>
-
+                    </div>
                 </div>
             </div>
         </div>
