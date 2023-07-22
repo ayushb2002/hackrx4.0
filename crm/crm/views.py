@@ -1110,140 +1110,139 @@ def generateDataForInsta(request):
                 print(username)
                 try:
                     instagram_profile = InstagramProfile.objects.get(username=username)
-                except InstagramProfile.DoesNotExist:
-                    return Response({'error': 'Instagram profile not found'}, status=404)
-                comments_data = []
-                instagram_profile_data = InstagramProfile.objects.filter(username=username).values().first()
-                post_urls = instagram_profile_data['post_urls']
-                instagram_profile_data = InstagramProfile.objects.filter(username=username).values().first()
+               
+                    comments_data = []
+                    instagram_profile_data = InstagramProfile.objects.filter(username=username).values().first()
+                    post_urls = instagram_profile_data['post_urls']
+                    instagram_profile_data = InstagramProfile.objects.filter(username=username).values().first()
 
-                for post in post_urls:
-                    post_data = InstagramStats.objects.get(post_link=post)
-                    comments = post_data.comments
+                    for post in post_urls:
+                        post_data = InstagramStats.objects.get(post_link=post)
+                        comments = post_data.comments
 
-                    for comment in comments:
-                        username = comment['username']
-                        if InstagramProfile.objects.filter(username=username).exists():
-                            obj = InstagramProfile.objects.get(username=username)
-                            bio = obj.biography
+                        for comment in comments:
+                            username = comment['username']
+                            if InstagramProfile.objects.filter(username=username).exists():
+                                obj = InstagramProfile.objects.get(username=username)
+                                bio = obj.biography
+                            else:
+                                bio = ""
+                            comment_text = comment['comment']
+                            comments_data.append({'username': username, 'bio': bio, 'comment': comment_text})
+
+
+
+        
+        
+                    
+                    df = pd.DataFrame(comments_data)
+                    print(df)
+                    
+                    #intent anaylsis
+                    intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
+                    intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
+                    def predict_intent(s):
+                        s = [s]
+                        d = intent.predict(intent_tfidf.transform(s))
+                        if d[0][0] == 1:
+                            return "enquiry"
+                        elif d[0][1] == 1:
+                            return "general talk"
                         else:
-                            bio = ""
-                        comment_text = comment['comment']
-                        comments_data.append({'username': username, 'bio': bio, 'comment': comment_text})
+                            return "complaint"
 
-
-
-    
-    
-                
-                df = pd.DataFrame(comments_data)
-                print(df)
-                
-                #intent anaylsis
-                intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
-                intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
-                def predict_intent(s):
-                    s = [s]
-                    d = intent.predict(intent_tfidf.transform(s))
-                    if d[0][0] == 1:
-                        return "enquiry"
-                    elif d[0][1] == 1:
-                        return "general talk"
+                    df["intent"] = df["comment"].apply(predict_intent)
+                    value_counts = df["intent"].value_counts()
+                    if "general talk" in value_counts.index:
+                        general = value_counts['general talk']
                     else:
-                        return "complaint"
-
-                df["intent"] = df["comment"].apply(predict_intent)
-                value_counts = df["intent"].value_counts()
-                if "general talk" in value_counts.index:
-                    general = value_counts['general talk']
-                else:
-                    general = 0
-                if "complaint" in value_counts.index:
-                    complaint = value_counts['complaint']
-                else:
-                    complaint = 0
-                if "enquiry" in value_counts.index:
-                    enquiry = value_counts['enquiry']
-                else:
-                    enquiry = 0
-                intent_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:[" + str(general) + "," + str(complaint) + "," + str(enquiry) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
-                leads = []
-                
-                for index, row in df.iterrows():
-                    print(row['intent'])
-                    if row['intent'] == 'enquiry':
-                        leads.append((row['username'],row['bio']))
-                
-                sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
-                sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
-                def predict_sentiment(s):
-                    s = [s]
-                    d = sentiment.predict(sentiment_tfidf.transform(s))
-                    if d[0] == 1:
-                        return "positive"
+                        general = 0
+                    if "complaint" in value_counts.index:
+                        complaint = value_counts['complaint']
                     else:
-                        return "negative"
+                        complaint = 0
+                    if "enquiry" in value_counts.index:
+                        enquiry = value_counts['enquiry']
+                    else:
+                        enquiry = 0
+                    intent_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:[" + str(general) + "," + str(complaint) + "," + str(enquiry) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                    leads = []
+                    
+                    for index, row in df.iterrows():
+                        print(row['intent'])
+                        if row['intent'] == 'enquiry':
+                            leads.append((row['username'],row['bio']))
+                    
+                    sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
+                    sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
+                    def predict_sentiment(s):
+                        s = [s]
+                        d = sentiment.predict(sentiment_tfidf.transform(s))
+                        if d[0] == 1:
+                            return "positive"
+                        else:
+                            return "negative"
 
-                df["sentiment"] = df["comment"].apply(lambda x: predict_sentiment(x))
-                response = df["sentiment"].value_counts()
-                if "positive" in response.index:
-                    positive = response['positive']
-                else:
-                    positive = 0
-                if "negative" in response.index:
-                    negative = response['negative']
-                else:
-                    negative = 0
-                res_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:[" + str(positive) + "," + str(negative) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
-                for index, row in df.iterrows():
-                    print(row['sentiment'])
-                    if row['sentiment'] == 'positive':
+                    df["sentiment"] = df["comment"].apply(lambda x: predict_sentiment(x))
+                    response = df["sentiment"].value_counts()
+                    if "positive" in response.index:
+                        positive = response['positive']
+                    else:
+                        positive = 0
+                    if "negative" in response.index:
+                        negative = response['negative']
+                    else:
+                        negative = 0
+                    res_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:[" + str(positive) + "," + str(negative) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                    for index, row in df.iterrows():
+                        print(row['sentiment'])
+                        if row['sentiment'] == 'positive':
+                            leads.append((row['username'], row['bio']))
+
+                    service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
+                    service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
+
+                    def predict_service(s):
+                        s = [s]
+                        d = service.predict(service_tfidf.transform(s))
+                        if d[0][0] == 1:
+                            return "EMI"
+                        elif d[0][1] == 1:
+                            return "insurance"
+                        elif d[0][2] == 1:
+                            return "investment"
+                        elif d[0][3] == 1:
+                            return "loan"
+                        elif d[0][4] == 1:
+                            return "savings"
+                        else:
+                            return "card"
+
+                    df["service"] = df["comment"].apply(lambda x: predict_service(x))
+                    service = df["service"].value_counts()
+                    if "card" in service.index:
+                        card = service['card']
+                    else:
+                        card = 0
+                    if "EMI" in service.index:
+                        emi = service['EMI']
+                    else:
+                        emi = 0
+                    if "loan" in service.index:
+                        loan = service['loan']
+                    else:
+                        loan = 0
+                    if "investment" in service.index:
+                        investment = service['investment']
+                    else:
+                        investment = 0
+                    service_link = "https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:[" + str(card) + "," + str(emi) + "," + str(loan) + "," + str(investment) + "],fill:false,borderColor:'blue'}]}}"
+
+                    generated_leads = []
+                    for index, row in df.iterrows():
+                        print(row['intent'])
                         leads.append((row['username'], row['bio']))
-
-                service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
-                service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
-
-                def predict_service(s):
-                    s = [s]
-                    d = service.predict(service_tfidf.transform(s))
-                    if d[0][0] == 1:
-                        return "EMI"
-                    elif d[0][1] == 1:
-                        return "insurance"
-                    elif d[0][2] == 1:
-                        return "investment"
-                    elif d[0][3] == 1:
-                        return "loan"
-                    elif d[0][4] == 1:
-                        return "savings"
-                    else:
-                        return "card"
-
-                df["service"] = df["comment"].apply(lambda x: predict_service(x))
-                service = df["service"].value_counts()
-                if "card" in service.index:
-                    card = service['card']
-                else:
-                    card = 0
-                if "EMI" in service.index:
-                    emi = service['EMI']
-                else:
-                    emi = 0
-                if "loan" in service.index:
-                    loan = service['loan']
-                else:
-                    loan = 0
-                if "investment" in service.index:
-                    investment = service['investment']
-                else:
-                    investment = 0
-                service_link = "https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:[" + str(card) + "," + str(emi) + "," + str(loan) + "," + str(investment) + "],fill:false,borderColor:'blue'}]}}"
-
-                generated_leads = []
-                for index, row in df.iterrows():
-                    print(row['intent'])
-                    leads.append((row['username'], row['bio']))
-                    generated_leads.append((row['username'], row['bio'],row['service']))         
+                        generated_leads.append((row['username'], row['bio'],row['service']))         
                 # for lead in leads:
                 #     username = lead[0]
                 #     location = lead[1]
@@ -1251,30 +1250,207 @@ def generateDataForInsta(request):
                 #     if not Lead.objects.filter(username=username).exists():
                 #         lead_obj = Lead.objects.create(username=username, location=location, status='new')
                 #         lead_obj.save()
+                except InstagramProfile.DoesNotExist:
+
+                        conn = http.client.HTTPSConnection("scraper-api.smartproxy.com")
+                        payload = {
+                            "target": "instagram_graphql_profile",
+                            "url": f"https://www.instagram.com/{username}/",
+                            "locale": "en",
+                            "geo": "India"
+                        }
+                        headers = {
+                            'Accept': 'application/json',
+                            'Authorization': 'Basic UzAwMDAxMTExMjE6UCRXMTM5YThjMmQwNTM2NTg2MmI5ZTk0Y2IzZjM3NzAzMzJj',
+                            'Content-Type': 'application/json'
+                        }
+                        payload_str = json.dumps(payload)
+                        conn.request("POST", "/v1/scrape", payload_str, headers)
+                        res = conn.getresponse()
+                        data = res.read()
+                        response = json.loads(data.decode("utf-8"))
+                        # print(response)
+                        
+                        content = response.get('data', {}).get('content', {})
+                        user = content.get('user', {})
+                        
+                        # Extracting the required information
+                        username = user.get('username')
+                        is_verified = user.get('is_verified')
+                        followers_count = user.get('edge_followed_by', {}).get('count')
+                        following_count = user.get('edge_follow', {}).get('count')
+                        biography = user.get('biography')
+                        
+                        posts = []
+                        edges = user.get('edge_felix_video_timeline', {}).get('edges', [])
+                        for edge in edges:
+                            node = edge.get('node', {})
+                            shortcode = node.get('shortcode')
+                            post_url = f'https://www.instagram.com/p/{shortcode}/'
+                            posts.append(post_url)
+                        
+                        # result = {
+                        #     'username': username,
+                        #     'verified': is_verified,
+                        #     'followers': followers_count,
+                        #     'following': following_count,
+                        #     'biography': biography,
+                        #     'post_urls': posts
+                        # }
+                        # df=pd.DataFrame(result)
+                        extracted_info=[]
+                        for link in posts:
+                            conn = http.client.HTTPSConnection("scraper-api.smartproxy.com")
+                            payload = json.dumps({
+                                "target": "instagram_post",
+                                "url": link,
+                                "locale": "en",
+                                "geo": "India"
+                            })
+                            headers = {
+                                'Accept': 'application/json',
+                                'Authorization': 'Basic UzAwMDAxMTExMjE6UCRXMTM5YThjMmQwNTM2NTg2MmI5ZTk0Y2IzZjM3NzAzMzJj',
+                                'Content-Type': 'application/json'
+                            }
+                            conn.request("POST", "/v1/scrape", payload, headers)
+                            res = conn.getresponse()
+                            data = res.read().decode("utf-8")
+                            response = json.loads(data)
+
+                            # Extract the required information from the response
+                            comments = response['data']['content']['comments']
+                            extracted_info.append([{'username': comment['username'],'comment': comment['comment']} for comment in comments])
+                        df=pd.DataFrame(extracted_info)
+                        print(df)
+                          
+                        #intent anaylsis
+                        intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
+                        intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
+                        def predict_intent(s):
+                            s = [s]
+                            d = intent.predict(intent_tfidf.transform(s))
+                            if d[0][0] == 1:
+                                return "enquiry"
+                            elif d[0][1] == 1:
+                                return "general talk"
+                            else:
+                                return "complaint"
+
+                        df["intent"] = df["comment"].apply(predict_intent)
+                        value_counts = df["intent"].value_counts()
+                        if "general talk" in value_counts.index:
+                            general = value_counts['general talk']
+                        else:
+                            general = 0
+                        if "complaint" in value_counts.index:
+                            complaint = value_counts['complaint']
+                        else:
+                            complaint = 0
+                        if "enquiry" in value_counts.index:
+                            enquiry = value_counts['enquiry']
+                        else:
+                            enquiry = 0
+                        intent_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['General talk','Complaint','Enquiry'],datasets:[{data:[" + str(general) + "," + str(complaint) + "," + str(enquiry) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                        leads = []
+                        
+                        for index, row in df.iterrows():
+                            print(row['intent'])
+                            if row['intent'] == 'enquiry':
+                                leads.append((row['username']))
+                        
+                        sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
+                        sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
+                        def predict_sentiment(s):
+                            s = [s]
+                            d = sentiment.predict(sentiment_tfidf.transform(s))
+                            if d[0] == 1:
+                                return "positive"
+                            else:
+                                return "negative"
+
+                        df["sentiment"] = df["comment"].apply(lambda x: predict_sentiment(x))
+                        response = df["sentiment"].value_counts()
+                        if "positive" in response.index:
+                            positive = response['positive']
+                        else:
+                            positive = 0
+                        if "negative" in response.index:
+                            negative = response['negative']
+                        else:
+                            negative = 0
+                        res_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:[" + str(positive) + "," + str(negative) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                        for index, row in df.iterrows():
+                            print(row['sentiment'])
+                            if row['sentiment'] == 'positive':
+                                leads.append((row['username']))
+
+                        service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
+                        service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
+
+                        def predict_service(s):
+                            s = [s]
+                            d = service.predict(service_tfidf.transform(s))
+                            if d[0][0] == 1:
+                                return "EMI"
+                            elif d[0][1] == 1:
+                                return "insurance"
+                            elif d[0][2] == 1:
+                                return "investment"
+                            elif d[0][3] == 1:
+                                return "loan"
+                            elif d[0][4] == 1:
+                                return "savings"
+                            else:
+                                return "card"
+
+                        df["service"] = df["comment"].apply(lambda x: predict_service(x))
+                        service = df["service"].value_counts()
+                        if "card" in service.index:
+                            card = service['card']
+                        else:
+                            card = 0
+                        if "EMI" in service.index:
+                            emi = service['EMI']
+                        else:
+                            emi = 0
+                        if "loan" in service.index:
+                            loan = service['loan']
+                        else:
+                            loan = 0
+                        if "investment" in service.index:
+                            investment = service['investment']
+                        else:
+                            investment = 0
+                        service_link = "https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:[" + str(card) + "," + str(emi) + "," + str(loan) + "," + str(investment) + "],fill:false,borderColor:'blue'}]}}"
+
+                        generated_leads = []
+                        for index, row in df.iterrows():
+                            print(row['intent'])
+                            leads.append(row['username'])
+                            generated_leads.append((row['username'],row['service']))         
+                            
+                                        
                 current_user = request.user
                 employee = Employee.objects.get(email=current_user)
-                print(res_link)
-                print(intent_link)
-                print(service_link)
-                
                 context = {
-                    "username": current_user,
-                    "user_type": employee.position,
-                    "response_link": res_link,
-                    "intent_link": intent_link,
-                    "service_link": service_link,
-                    "positive": positive,
-                    "negative": negative,
-                    "card":card,
-                    "emi":emi,
-                    "loan":loan,
-                    "investment":investment,
-                    "general talk": general,
-                    "complaint": complaint,
-                    "enquiry": enquiry,
-                    "leads": generated_leads,
-                    "type":"insta"
-                } 
+                                    "username": current_user,
+                                    "user_type": employee.position,
+                                    "response_link": res_link,
+                                    "intent_link": intent_link,
+                                    "service_link": service_link,
+                                    "positive": positive,
+                                    "negative": negative,
+                                    "card":card,
+                                    "emi":emi,
+                                    "loan":loan,
+                                    "investment":investment,
+                                    "general talk": general,
+                                    "complaint": complaint,
+                                    "enquiry": enquiry,
+                                    "leads": generated_leads,
+                                    "type":"insta"
+                                }
+                            
                 return render(request, "analysis.html",context=context)
                 
         

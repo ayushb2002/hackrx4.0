@@ -1,6 +1,7 @@
 from django.urls import path,include
 from .views import get_instagram_profile,get_instagram_stats,get_instagram_posts,get_subreddit_data,test,get_tweets,scrape_facebook_page,save_posts,dashboard, generateDataForTwitter, generateDataForInsta, generateLeads, dataVisualization,sales_analytics,approve_employee_view,todo,settings,change_password_view,analysis, competitorAnalysis, dataFilter
 from django.shortcuts import redirect
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # username
@@ -39,5 +40,9 @@ urlpatterns = [
     path('change_password/', change_password_view, name='change_password'),
     path('analysis/',analysis,name='analysis'),
     path('competitors/', competitorAnalysis, name="competitors"),
+
     path('dataFilter/', dataFilter, name='dataFilter'),
+
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
 ]
