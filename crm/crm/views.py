@@ -1494,6 +1494,7 @@ def dataVisualization(request):
                 df["intent"] = df["comment"].apply(predict_intent)
                 value_counts = df["intent"].value_counts()
                 if "general talk" in value_counts.index:
+                    warm_lead=value_counts['general talk']
                     general = value_counts['general talk']
                 else:
                     general = 0
@@ -1502,6 +1503,7 @@ def dataVisualization(request):
                 else:
                     complaint = 0
                 if "enquiry" in value_counts.index:
+                    hot_leads=value_counts['enquiry']
                     enquiry = value_counts['enquiry']
                 else:
                     enquiry = 0
@@ -1885,5 +1887,114 @@ def dataFilter(request):
             "user_type":employee.position
             }
         return render(request, "dataFilter.html", context)
-    elif request.method == "POST":
-        pass
+    if request.method == "POST":
+
+                keyword=request.POST.get('lead')
+                service_req=request.POST.get('service')
+                qualify=Tweet.objects.all()
+                if keyword:
+                    comments_data = []
+                    for obj in qualify:
+                        username=obj.screen_name
+                        comment=obj.full_text
+                        comments_data.append({'username':username,'comment':comment})
+                    df = pd.DataFrame(comments_data)
+                    print(df)
+                #intent anaylsis
+                    intent=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification.pkl"),"rb"))
+                    intent_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/intent_classification_tfidf.pkl"),"rb"))
+                    def predict_intent(s):
+                        s = [s]
+                        d = intent.predict(intent_tfidf.transform(s))
+                        if d[0][0] == 1:
+                            return "hot lead"
+                        elif d[0][1] == 1:
+                            return "warm lead"
+                        else:
+                            return "cold lead"
+
+                    df["intent"] = df["comment"].apply(predict_intent)
+                    value_counts = df["intent"].value_counts()
+                    if "general talk" in value_counts.index:
+                        warm_lead=value_counts['warm lead']
+                    else:
+                        warm_lead = 0
+                    if "complaint" in value_counts.index:
+                        cold_lead=value_counts['cold lead']
+                    
+                    else:
+                        cold_lead = 0
+                    if "enquiry" in value_counts.index:
+                        hot_lead=value_counts['hot lead']
+                    
+                    else:
+                        hot_lead = 0
+                    intent_link = "https://quickchart.io/chart?c={type:'doughnut',data:{labels:['warm lead','cold lead','hot lead'],datasets:[{data:[" + str(warm_lead) + "," + str(cold_lead) + "," + str(hot_lead) + "]}]},options:{plugins:{doughnutlabel:{labels:[{text:'550',font:{size:20}},{text:'total'}]}}}}"
+                    generated_leads = []
+                    
+                    for index, row in df.iterrows():
+                        if(row['intent']==keyword):
+                            generated_leads.append((row['username'],row['intent']))
+                    context={
+                    "username":current_user,
+                    "user_type":employee.position,
+                    "leads":generated_leads
+                    }
+                    return render(request,'analysis.html',context=context)
+                # for index, row in df.iterrows():
+                #     print(row['intent'])
+                #     if row['intent'] == 'enquiry':
+                #         leads.append(row['username'])
+                if service_req:
+                    service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
+                    service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
+
+                    def predict_service(s):
+                        s = [s]
+                        d = service.predict(service_tfidf.transform(s))
+                        if d[0][0] == 1:
+                            return "EMI"
+                        elif d[0][1] == 1:
+                            return "insurance"
+                        elif d[0][2] == 1:
+                            return "investment"
+                        elif d[0][3] == 1:
+                            return "loan"
+                        elif d[0][4] == 1:
+                            return "savings"
+                        else:
+                            return "card"
+
+                    df["service"] = df["comment"].apply(lambda x: predict_service(x))
+                    service = df["service"].value_counts()
+                    if "card" in service.index:
+                        card = service['card']
+                    else:
+                        card = 0
+                    if "EMI" in service.index:
+                        emi = service['EMI']
+                    else:
+                        emi = 0
+                    if "loan" in service.index:
+                        loan = service['loan']
+                    else:
+                        loan = 0
+                    if "investment" in service.index:
+                        investment = service['investment']
+                    else:
+                        investment = 0
+                    service_link = "https://quickchart.io/chart?c={type:'bar',data:{labels:['Cards','EMI','loan','Investment'],datasets:[{label:'This month',data:[" + str(card) + "," + str(emi) + "," + str(loan) + "," + str(investment) + "],fill:false,borderColor:'blue'}]}}"
+
+                    generated_leads = []
+                    for index, row in df.iterrows():
+                        print(row['service'])
+                        if(row['service']==service_req):
+                            generated_leads.append((row['username'],row['service']))
+                        
+                    context={
+                    "username":current_user,
+                    "user_type":employee.position,
+                    "leads":generated_leads
+                    }
+                    
+                    return render(request,'analysis.html',context=context)
