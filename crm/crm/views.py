@@ -1461,7 +1461,13 @@ def sales_analytics(request):
 
 
 def todo(request):
-    return render(request, "todo.html")
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    context={
+            "username":current_user,
+            "user_type":employee.position
+            }
+    return render(request, "todo.html", context)
 
 def settings(request):
     current_user = request.user

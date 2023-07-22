@@ -2,10 +2,81 @@
 {% load static %}
 
 {% block title %}
-   To do
+To do
 {% endblock title %}
 
 {% block content %}
 
-<img src="{{stats}}" width="50%">
+<div class="page-header">
+   <h3 class="page-title"> To Do List </h3>
+   <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+         <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'todo' %}">To Do</a></li>
+      </ol>
+   </nav>
+</div>
+
+<div class="row">
+   <div class="col-md-3"></div>
+   <div class="col-md-6 grid-margin stretch-card">
+      <div class="card">
+         <div class="card-body">
+            <h4 class="card-title">Todo</h4>
+            <div class="add-items d-flex">
+               <input type="text" class="form-control todo-list-input" placeholder="What do you need to do today?">
+               <button class="add btn btn-gradient-primary font-weight-bold todo-list-add-btn"
+                  id="add-task">Add</button>
+            </div>
+            <div class="list-wrapper">
+               <ul class="d-flex flex-column-reverse todo-list todo-list-custom">
+                  {% comment %} <li>
+                     <div class="form-check">
+                        <label class="form-check-label">
+                           <input class="checkbox" type="checkbox"> Meeting with Alisa </label>
+                     </div>
+                     <i class="remove mdi mdi-close-circle-outline"></i>
+                  </li>
+                  <li class="completed">
+                     <div class="form-check">
+                        <label class="form-check-label">
+                           <input class="checkbox" type="checkbox" checked> Call John </label>
+                     </div>
+                     <i class="remove mdi mdi-close-circle-outline"></i>
+                  </li>
+                  <li>
+                     <div class="form-check">
+                        <label class="form-check-label">
+                           <input class="checkbox" type="checkbox"> Create invoice </label>
+                     </div>
+                     <i class="remove mdi mdi-close-circle-outline"></i>
+                  </li>
+                  <li>
+                     <div class="form-check">
+                        <label class="form-check-label">
+                           <input class="checkbox" type="checkbox"> Print Statements </label>
+                     </div>
+                     <i class="remove mdi mdi-close-circle-outline"></i>
+                  </li>
+                  <li class="completed">
+                     <div class="form-check">
+                        <label class="form-check-label">
+                           <input class="checkbox" type="checkbox" checked> Prepare for presentation </label>
+                     </div>
+                     <i class="remove mdi mdi-close-circle-outline"></i>
+                  </li>
+                  <li>
+                     <div class="form-check">
+                        <label class="form-check-label">
+                           <input class="checkbox" type="checkbox"> Pick up kids from school </label>
+                     </div>
+                     <i class="remove mdi mdi-close-circle-outline"></i>
+                  </li> {% endcomment %}
+               </ul>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3"></div>
+</div>
+
 {% endblock content %}

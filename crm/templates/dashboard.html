@@ -27,7 +27,8 @@ Dashboard | CRM
             <div class="card-body">
                 <img src="{% static 'assets/images/dashboard/circle.svg' %}" class="card-img-absolute"
                     alt="circle-image" />
-                <h4 class="font-weight-normal mb-3">Leads generated <i class="mdi mdi-chart-line mdi-24px float-right"></i>
+                <h4 class="font-weight-normal mb-3">Leads generated <i
+                        class="mdi mdi-chart-line mdi-24px float-right"></i>
                 </h4>
                 <h2 class="mb-5">{{leads_generated}}</h2>
                 {% comment %} <h6 class="card-text">Increased by 60%</h6> {% endcomment %}
@@ -50,10 +51,10 @@ Dashboard | CRM
                     <img src="{{service}}" href="response image" width="55%">
                     <div id="visit-sale-chart-legend"
                         class="rounded-legend legend-horizontal legend-top-right float-right"></div>
-                       
+
                 </div>
-                
-                
+
+
             </div>
         </div>
     </div>
@@ -61,8 +62,8 @@ Dashboard | CRM
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">Intent anaylsis</h4>
-               <img src="{{intent}}" href="intent image" width="85%">
-               
+                <img src="{{intent}}" href="intent image" width="85%">
+
                 <div id="traffic-chart-legend" class="rounded-legend legend-vertical legend-bottom-left pt-4"></div>
             </div>
         </div>
@@ -86,155 +87,159 @@ Dashboard | CRM
                             </tr>
                         </thead>
                         <tbody>
-                           
-                                {% for lead in leads %}
-                                <tr>
-                                    <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
-                                        <input type="hidden" name="lead_name" value="{{ lead.username }}">
-                                        <input type="hidden" name="form_id" value="{{ id }}">
+
+                            {% for lead in leads %}
+                            <tr>
+                                <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
+                                    <input type="hidden" name="lead_name" value="{{ lead.username }}">
+                                    <input type="hidden" name="form_id" value="{{ id }}">
                                     <td>{{ lead.status }}</td>
                                     <td>{{ lead.username }}</td>
                                     <td>{{ lead.location }}</td>
                                     <td>{{ lead.handled_by }}</td>
-                                    
-                                        <td>
-                                            <select id="status-{{ lead.username }}-{{ id }}" name="status">
-                                                
-                                               <option> working</option>
-                                               
-                                               
-                                                
-                                                
-                                        
-                                            </select>
-                                            
-                                        </td>
 
-                                </tr>
+                                    <td>
+                                        <select id="status-{{ lead.username }}-{{ id }}" name="status">
+
+                                            <option> working</option>
+
+
+
+
+
+                                        </select>
+
+                                    </td>
+
+                            </tr>
                             </form>
                             {% endfor %}
-                                  
+
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-{% endif %}
+    {% endif %}
 
-{% if user_type == "sales" %}
-<div class="row">
-    <div class="col-md-7 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Leads generated</h4>
-                <div class="table-responsive">
+    {% if user_type == "sales" %}
+    <div class="row">
+        <div class="col-md-7 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Leads generated</h4>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th> Status </th>
+                                    <th> Username </th>
+                                    <th> location </th>
+                                    <th> Managed by</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for lead in leads %}
+                                <tr>
+                                    <td>
+                                        <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
+                                            <input type="hidden" name="account_name" value="{{ lead.username }}">
+                                            <input type="hidden" name="form_id" value="{{ id }}">
+
+
+                                            <select id="status-{{ lead.username }}-{{ id }}" name="status">
+                                                <option value="new">New Lead</option>
+                                                <option value="engaged">Engaged Lead</option>
+                                                <option value="qualified">Qualified Lead</option>
+                                                <option value="converted">Converted Lead</option>
+                                                <option value="lost">Lost Lead</option>
+                                            </select>
+
+                                        </form>
+                                    </td>
+                                    <td>{{ lead.username }}</td>
+                                    <td>{{ lead.location }}</td>
+                                    <td>{{ lead.handled_by }}</td>
+                                    <!-- Display more fields as needed -->
+                                </tr>
+                                <script>
+                                    document.getElementById('status-{{ lead.username }}-{{ id }}').addEventListener(
+                                        'change',
+                                        function () {
+                                            document.getElementById('lead-form-{{ lead.username }}-{{ id }}')
+                                                .submit();
+                                        });
+                                </script>
+                                {% endfor %}
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        {% endif %}
+
+
+
+
+        <div class="col-md-5 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" action="{% url 'approve_employee' %}" id="emp_req" name="emp_req">
+                        {% csrf_token %}
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Employee Name</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employee_req %}
+                                <tr>
+                                    <td>{{ employee.name }}</td>
+                                    <td>
+                                        <button type="submit" name="employee_id" value="{{ employee.id }}"
+                                            class="btn btn-success">Approve</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </form>
+                    <br><br>
                     <table class="table">
+                        Top performing sales employee
+                        <br>
                         <thead>
                             <tr>
-                                <th> Status </th>
-                                <th> Username </th>
-                                <th> location </th>
-                                <th> Managed by</th>
+                                <th>Employee Name</th>
+                                <th>Leads generated</th>
                             </tr>
                         </thead>
-                        
-                        <tbody>
-                           
-                            {% for lead in leads %}
-                            <tr>
-                              <td>
-                                <form method="POST" id="lead-form-{{ lead.username }}-{{ id }}">
-                                  <input type="hidden" name="account_name" value="{{ lead.username }}">
-                                  <input type="hidden" name="form_id" value="{{ id }}">
-                                
-                                  
-                                  <select id="status-{{ lead.username }}-{{ id }}" name="status">
-                                    <option value="new">New Lead</option>
-                                    <option value="engaged">Engaged Lead</option>
-                                    <option value="qualified">Qualified Lead</option>
-                                    <option value="converted">Converted Lead</option>
-                                    <option value="lost">Lost Lead</option>
-                                  </select>
-                                 
-                                </form>
-                              </td>
-                              <td>{{ lead.username }}</td>
-                              <td>{{ lead.location }}</td>
-                              <td>{{ lead.handled_by }}</td>
-                              <!-- Display more fields as needed -->
-                            </tr>
-                            <script>
-                              document.getElementById('status-{{ lead.username }}-{{ id }}').addEventListener('change', function() {
-                                document.getElementById('lead-form-{{ lead.username }}-{{ id }}').submit();
-                              });
-                            </script>
-                            {% endfor %}
-                            
-                                  
-                        </tbody>
+                        {% for employee_lead in top_performers %}
+                        <tr>
+                            <td>{{ employee_lead.name }}</td>
+                            <td>
+                                {{ employee_lead.converted_lead_count }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </thead>
                     </table>
+                    <tbody>
+
                 </div>
             </div>
         </div>
     </div>
 
-
-
-{% endif %}
-
-
-
-
-<div class="col-md-5 grid-margin stretch-card">
-    <div class="card">
-      <div class="card-body">
-        <form method="POST" action="{% url 'approve_employee' %}" id="emp_req" name="emp_req">
-          {% csrf_token %}
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Employee Name</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for employee in employee_req %}
-              <tr>
-                <td>{{ employee.name }}</td>
-                <td>
-                  <button type="submit" name="employee_id" value="{{ employee.id }}" class="btn btn-success">Approve</button>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </form>
-        <br><br>
-        <table class="table">
-            Top performing sales employee
-            <br>
-            <thead>
-              <tr>
-                <th>Employee Name</th>
-                <th>Leads generated</th>
-              </tr>
-            </thead>
-              {% for employee_lead in top_performers %}
-              <tr>
-                <td>{{ employee_lead.name }}</td>
-                <td>
-                    {{ employee_lead.converted_lead_count }}
-                </td>
-              </tr>
-              {% endfor %}
-            </thead>
-        </table>
-            <tbody>
-
-      </div>
-    </div>
-  </div>
-</div>
-
-{% endblock content %}
+    {% endblock content %}
