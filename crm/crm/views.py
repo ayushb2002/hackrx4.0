@@ -1891,6 +1891,7 @@ def dataFilter(request):
 
                 keyword=request.POST.get('lead')
                 service_req=request.POST.get('service')
+                
                 qualify=Tweet.objects.all()
                 if keyword:
                     comments_data = []
@@ -1946,6 +1947,14 @@ def dataFilter(request):
                 #     if row['intent'] == 'enquiry':
                 #         leads.append(row['username'])
                 if service_req:
+                    comments_data=[]
+                    for obj in qualify:
+                        username=obj.screen_name
+                        comment=obj.full_text
+                        comments_data.append({'username':username,'comment':comment})
+                    df = pd.DataFrame(comments_data)
+                    print("here")
+                    print(service_req)
                     service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
                     service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
 
