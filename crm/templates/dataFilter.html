@@ -38,6 +38,31 @@ Data Filter
             </div>
         </div>
     </div>
+
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Service filter form</h4>
+                <p class="card-description"> Choose a service </p>
+                <form class="forms-sample">
+                    <div class="form-group">
+                        <label for="selectService">Filter</label>
+                        <select class="form-control form-control-lg" id="selectService" name="lead">
+                            <option value="EMI">EMI</option>
+                            <option value="Card">Card</option>
+                            <option value="Loan">Loan</option>
+                            <option value="Insurance">Insurance</option>
+                            <option value="Investment">Investment</option>
+                            <option value="Savings">Savings</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-gradient-primary me-2">Submit</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-light">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock content %}
