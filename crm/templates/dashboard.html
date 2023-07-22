@@ -6,6 +6,8 @@ Dashboard | CRM
 {% endblock title %}
 
 {% block content %}
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
 <div class="page-header">
     <h3 class="page-title">
         <span class="page-title-icon bg-gradient-primary text-white me-2">
@@ -96,7 +98,29 @@ Dashboard | CRM
                                     <td>{{ lead.status }}</td>
                                     <td>{{ lead.username }}</td>
                                     <td>{{ lead.location }}</td>
+<<<<<<< Updated upstream
                                     <td>{{ lead.handled_by }}</td>
+=======
+                                    <td>Not assigned yet</td>
+                                    
+                                        <td>
+                                            <select id="emp-allot" name="status">
+                                               
+                                                    <option value="">Harsh</option>
+                                                    <option value="">ayush</option>
+                                                    <option value="">harsh</option>
+                                                    <option value="">ayush</option>
+                                                    <option value="">Anusha2</option>
+                                                    <option value="">harsh</option>
+                                                    <option value="">Ayush</option>
+                                                    <option value="">Ayush Bansal</option>
+
+                                              
+                                            </select>
+                                            
+                                            
+                                        </td>
+>>>>>>> Stashed changes
 
                                     <td>
                                         <select id="status-{{ lead.username }}-{{ id }}" name="status">
