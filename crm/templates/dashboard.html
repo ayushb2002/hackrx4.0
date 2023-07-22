@@ -27,7 +27,7 @@ Dashboard | CRM
             <div class="card-body">
                 <img src="{% static 'assets/images/dashboard/circle.svg' %}" class="card-img-absolute"
                     alt="circle-image" />
-                <h4 class="font-weight-normal mb-3">Leads generated <i
+                <h4 class="font-weight-normal mb-3">Leads Generated <i
                         class="mdi mdi-chart-line mdi-24px float-right"></i>
                 </h4>
                 <h2 class="mb-5">{{leads_generated}}</h2>
@@ -37,34 +37,31 @@ Dashboard | CRM
     </div>
 </div>
 <div class="row">
-    <div class="col-md-7 grid-margin stretch-card">
+    <div class="col-md-6 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
                 <div class="clearfix">
                     <h4 class="card-title float-left">Response</h4>
-                    <img src="{{response}}" href="response image" width="55%">
-                    <br>
-                    <br>
-
-                    service
-                    <br>
-                    <img src="{{service}}" href="response image" width="55%">
-                    <div id="visit-sale-chart-legend"
-                        class="rounded-legend legend-horizontal legend-top-right float-right"></div>
-
+                    <img src="{{response}}" href="response image" width="100%">
                 </div>
-
-
             </div>
         </div>
     </div>
-    <div class="col-md-5 grid-margin stretch-card">
+    <div class="col-md-6 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">Intent anaylsis</h4>
                 <img src="{{intent}}" href="intent image" width="85%">
-
-                <div id="traffic-chart-legend" class="rounded-legend legend-vertical legend-bottom-left pt-4"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="clearfix">
+                    <h4 class="card-title float-left">Services</h4>
+                    <img src="{{service}}" href="response image" width="100%">
+                </div>
             </div>
         </div>
     </div>

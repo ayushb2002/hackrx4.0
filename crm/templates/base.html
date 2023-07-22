@@ -141,14 +141,14 @@
             <nav class="sidebar sidebar-offcanvas" id="sidebar">
                 <ul class="nav">
                     <li class="nav-item nav-profile">
-                        <a href="#" class="nav-link">
+                        <a href="{% url 'settings' %}" class="nav-link">
                             <div class="nav-profile-image">
                                 <img src="{% static 'assets/images/faces-clipart/pic-6.png' %}" alt="profile">
                                 <span class="login-status online"></span>
                                 <!--change to offline or busy as needed-->
                             </div>
                             <div class="nav-profile-text d-flex flex-column">
-                                <span class="font-weight-bold mb-2">{{uname}}</span>
+                                <span class="font-weight-bold mb-2 text-small">{{username}}</span>
                                 <span class="text-secondary text-small">{{user_type}}</span>
                             </div>
                             <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
