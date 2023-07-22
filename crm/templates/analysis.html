@@ -33,8 +33,8 @@ To do
                         <thead>
                             <tr>
                                 <th>Username</th>
+                                <th>Full Name</th>
                                 <th>Location/Predicted Service</th>
-                                <th> </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,8 +46,9 @@ To do
                                 <td><a href="https://twitter.com/{{ lead.0 }}" target="_blank">{{ lead.0 }}</a></td>
                                 {%endif%}
                                 <!-- The first element (username) of the tuple -->
-                                <td class="content-wrapper">{{ lead.1 }}</td> <!-- The second element (location) of the tuple -->
-                                <td>{{ lead.2 }}</td> <!-- The third element (predicted service) of the tuple -->
+                                <td><a href="{% url 'profileClassify' name=lead.1 %}">{{ lead.1 }}</a></td> <!-- The second element (location) of the tuple -->
+                                <td class="content-wrapper">{{ lead.2 }}</td> <!-- The third element (predicted service) of the tuple -->
+                                <td class="content-wrapper">{{ lead.3 }}</td> <!-- The third element (predicted service) of the tuple -->
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -462,7 +462,7 @@ def get_tweets(request):
             querystring['until'] = until
 
         headers = {
-            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
+            'X-RapidAPI-Key': 'a6c3b6d46bmsha68f5b59d204b5ap117d39jsn1dbc53c3d761',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
@@ -892,7 +892,7 @@ def generateDataForTwitter(request):
         #     querystring['until'] = until
 
         headers = {
-            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
+            'X-RapidAPI-Key': 'a6c3b6d46bmsha68f5b59d204b5ap117d39jsn1dbc53c3d761',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
 
@@ -982,7 +982,7 @@ def generateDataForTwitter(request):
         for index, row in df.iterrows():
             print(row['intent'])
             if row['intent'] == 'Hot Lead':
-                leads.append((row['user']['screen_name'], row['user']['location']))
+                leads.append((row['user']['screen_name'],  row['user']['location']))
         
         sentiment=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_clf.pkl"),"rb"))
         sentiment_tfidf=pkl.load(open(os.path.join(BASE_DIR,"model/sentiment_tfidf.pkl"),"rb"))
@@ -1008,7 +1008,7 @@ def generateDataForTwitter(request):
         for index, row in df.iterrows():
             print(row['sentiment'])
             if row['sentiment'] == 'positive':
-                leads.append((row['user']['screen_name'], row['user']['location']))
+                leads.append((row['user']['screen_name'],  row['user']['location']))
 
         service = pkl.load(open(os.path.join(BASE_DIR, "model/service_model.pkl"), "rb"))
         service_tfidf = pkl.load(open(os.path.join(BASE_DIR,"model/service_model_tfidf.pkl"), "rb"))
@@ -1053,7 +1053,7 @@ def generateDataForTwitter(request):
         for index, row in df.iterrows():
             print(row['intent'])
             leads.append((row['user']['screen_name'], row['user']['location']))
-            generated_leads.append((row['user']['screen_name'], row['user']['location'],row['service']))         
+            generated_leads.append((row['user']['screen_name'], row['user']['name'], row['user']['location'],row['service']))         
         for lead in leads:
             username = lead[0]
             location = lead[1]
@@ -1110,7 +1110,6 @@ def generateDataForInsta(request):
                 print(username)
                 try:
                     instagram_profile = InstagramProfile.objects.get(username=username)
-               
                     comments_data = []
                     instagram_profile_data = InstagramProfile.objects.filter(username=username).values().first()
                     post_urls = instagram_profile_data['post_urls']
@@ -1474,8 +1473,9 @@ def dataVisualization(request):
                 comments_data = []
                 for obj in qualify:
                     username=obj.screen_name
+                    full_name=obj.user_name
                     comment=obj.full_text
-                    comments_data.append({'username':username,'comment':comment})
+                    comments_data.append({'username':username, 'full_name': full_name, 'comment':comment})
                 df = pd.DataFrame(comments_data)
                 print(df)
             #intent anaylsis
@@ -1584,7 +1584,7 @@ def dataVisualization(request):
                 for index, row in df.iterrows():
                     print(row['intent'])
                     leads.append(row['username'])
-                    generated_leads.append((row['username'],row['service']))         
+                    generated_leads.append((row['username'], row['full_name'], row['service']))         
                 # for lead in leads:
                 #     username = lead[0]
                 #     location = lead[1]
@@ -1597,11 +1597,6 @@ def dataVisualization(request):
                 print(res_link)
                 print(intent_link)
                 print(service_link)
-            
-        
-        
-        
-
                 current_user = request.user
                 employee = Employee.objects.get(email=current_user)
                 context = {
@@ -1792,7 +1787,7 @@ def competitorAnalysis(request):
         querystring = {"q": competitor, "count": count}
 
         headers = {
-            'X-RapidAPI-Key': 'b9b4460051msh2cc02cd6a9a23a5p1cd789jsnb191a1337122',
+            'X-RapidAPI-Key': 'a6c3b6d46bmsha68f5b59d204b5ap117d39jsn1dbc53c3d761',
             'X-RapidAPI-Host': 'twitter135.p.rapidapi.com'
         }
         
@@ -1897,8 +1892,9 @@ def dataFilter(request):
                     comments_data = []
                     for obj in qualify:
                         username=obj.screen_name
+                        full_name=obj.user_name
                         comment=obj.full_text
-                        comments_data.append({'username':username,'comment':comment})
+                        comments_data.append({'username':username, 'full_name':full_name, 'comment':comment})
                     df = pd.DataFrame(comments_data)
                     print(df)
                 #intent anaylsis
@@ -1935,7 +1931,7 @@ def dataFilter(request):
                     
                     for index, row in df.iterrows():
                         if(row['intent']==keyword):
-                            generated_leads.append((row['username'],row['intent']))
+                            generated_leads.append((row['username'], row['full_name'], row['intent']))
                     context={
                     "username":current_user,
                     "user_type":employee.position,
@@ -1950,8 +1946,9 @@ def dataFilter(request):
                     comments_data=[]
                     for obj in qualify:
                         username=obj.screen_name
+                        full_name=obj.user_name
                         comment=obj.full_text
-                        comments_data.append({'username':username,'comment':comment})
+                        comments_data.append({'username':username, 'full_name':full_name, 'comment':comment})
                     df = pd.DataFrame(comments_data)
                     print("here")
                     print(service_req)
@@ -1998,8 +1995,9 @@ def dataFilter(request):
                     for index, row in df.iterrows():
                         print(row['service'])
                         if(row['service']==service_req):
-                            generated_leads.append((row['username'],row['service']))
-                        
+                            generated_leads.append((row['username'], row['full_name'], row['service']))
+                    
+                    print(generated_leads)
                     context={
                     "username":current_user,
                     "user_type":employee.position,
@@ -2007,3 +2005,69 @@ def dataFilter(request):
                     }
                     
                     return render(request,'analysis.html',context=context)
+
+def profileClassify(request, name):
+    current_user = request.user
+    employee = Employee.objects.get(email=current_user)
+    if name != "": 
+        try:
+            splitName = name.split(' ')
+            first_name, last_name =  splitName[0], splitName[1]
+        except:
+            first_name = name
+            last_name = ''
+        api_key = "c24aa1d30b93da5e048677ae4d5e4b5c"
+        url = "https://v2.namsor.com/NamSorAPIv2/api2/json/originBatch"
+        url_gender = "https://v2.namsor.com/NamSorAPIv2/api2/json/genderFullBatch"
+        url_ethnicity = "https://v2.namsor.com/NamSorAPIv2/api2/json/diasporaBatch"
+        payload = {
+            "personalNames": [
+                {
+                "id": "1",
+                "firstName": first_name,
+                "lastName": last_name
+                }
+            ]
+            }
+        headers = {
+                "X-API-KEY": api_key,
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+        }
+        
+        response = requests.request("POST", url, json=payload, headers=headers)
+        data = response.json()
+        countries = data["personalNames"][0]["countriesOriginTop"]
+        region = data["personalNames"][0]["regionOrigin"]
+        
+        response = requests.request("POST", url_ethnicity, json=payload, headers=headers)
+        data = response.json()
+        
+        ethnicities = data["personalNames"][0]["ethnicitiesTop"]
+        
+        payload = {
+            "personalNames": [
+                {
+                "id": "1",
+                "name": name
+                }
+            ]
+        }
+        
+        response = requests.request("POST", url_gender, json=payload, headers=headers)
+        data = response.json()
+        gender = data["personalNames"][0]["likelyGender"]
+        
+        context = {
+            "first": first_name.capitalize(),
+            "last": last_name.capitalize(),
+            "username":current_user,
+            "user_type":employee.position,
+            "countries": countries,
+            "ethnicities": ethnicities,
+            "globe": region,
+            "gender": gender.capitalize()
+        }
+        return render(request, "showPersonalInformation.html", context)
+    else:
+        return HttpResponse('Not found')

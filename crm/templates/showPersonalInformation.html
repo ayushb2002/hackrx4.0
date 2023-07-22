@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+To do
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-header">
+    <h3 class="page-title"> Personal Information </h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">{{full_name}}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Profile Analysis</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th> First name </th>
+                            <th> Last name </th>
+                            <th> Possible Country of Origin </th>
+                            <th> Globe </th>
+                            <th> Possible Ethnicity </th>
+                            <th> Probable Gender </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-1">
+                                <img src="{% static 'assets/images/faces-clipart/pic-1.png' %}" alt="image" />
+                            </td>
+                            <td> {{ first }} </td>
+                            <td> {{ last }} </td>
+                            <td>
+                                {{ countries.0 }} or {{ countries.1 }}
+                            </td>
+                            <td> {{ globe }} </td>
+                            <td> {{ ethnicities.0 }} or {{ ethnicities.1 }} </td>
+                            <td> {{ gender }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
